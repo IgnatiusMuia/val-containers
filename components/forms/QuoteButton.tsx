@@ -1,0 +1,45 @@
+"use client";
+
+import { Icon } from "@/components/ui/Icons";
+import { buttonStyles } from "@/components/ui/Button";
+import { cn } from "@/lib/format";
+import { useQuote } from "./QuoteProvider";
+
+export function QuoteButton({
+  children = "Get a quote",
+  variant = "primary",
+  size = "md",
+  className,
+  source = "cta",
+  icon = true,
+  onOpen,
+}: {
+  children?: React.ReactNode;
+  variant?: "primary" | "dark" | "outline" | "outline-dark" | "ghost";
+  size?: "sm" | "md" | "lg";
+  className?: string;
+  source?: string;
+  icon?: boolean;
+  onOpen?: () => void;
+}) {
+  const { openQuote } = useQuote();
+
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        openQuote(source);
+        onOpen?.();
+      }}
+      className={cn(buttonStyles({ variant, size, className }))}
+    >
+      <span>{children}</span>
+      {icon ? (
+        <Icon
+          name="arrow-up-right"
+          className="h-4 w-4 transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5"
+        />
+      ) : null}
+    </button>
+  );
+}
