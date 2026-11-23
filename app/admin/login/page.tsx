@@ -47,6 +47,13 @@ export default async function AdminLoginPage({
             </p>
           ) : null}
 
+          {error === "expired" ? (
+            <p className="mt-6 border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+              Your admin session timed out after 8 hours of inactivity. Sign in
+              again.
+            </p>
+          ) : null}
+
           <div className="mt-8">
             <LoginForm configured={isSupabaseConfigured} />
           </div>

@@ -2,12 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   deliveryDisclaimers,
-  deliveryRegions,
   deliverySteps,
   siteAccessChecks,
 } from "@/data/delivery";
-import { faqs } from "@/data/faqs";
 import { site } from "@/data/site";
+import { contentValue, getFaqs, getSiteContent } from "@/lib/content";
 import { breadcrumbSchema, faqSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
@@ -40,12 +39,46 @@ export const metadata: Metadata = {
   },
 };
 
-const deliveryFaqs = [
-  faqs.find((faq) => faq.question === "How much does delivery cost?"),
-  faqs.find((faq) => faq.question === "Do you deliver outside Kenya?"),
-].filter((faq): faq is (typeof faqs)[number] => Boolean(faq));
+export default async function DeliveryPage() {
+  const [content, faqs] = await Promise.all([getSiteContent(), getFaqs()]);
 
-export default function DeliveryPage() {
+  const deliveryFaqs = faqs.filter((faq) => faq.category === "delivery");
+  const heroEyebrow = contentValue(
+    content,
+    "delivery.hero.eyebrow",
+    "Countrywide · Written quotes",
+  );
+  const heroTitle = contentValue(
+    content,
+    "delivery.hero.title",
+    "Quoted to the gate. Not to the yard.",
+  ).replace(/\.$/, "");
+  const heroBody = contentValue(
+    content,
+    "delivery.hero.body",
+    "We deliver from our Nairobi yard across Kenya. You get one written figure for the truck, crane and offload — before the unit moves.",
+  );
+  const coverageTitle = contentValue(
+    content,
+    "delivery.coverage.title",
+    "Where the truck goes.",
+  );
+  const coverageBody = contentValue(
+    content,
+    "delivery.coverage.body",
+    "Coverage and the final delivery cost are confirmed after the site access check. No fixed delivery price is published until it has been verified.",
+  );
+  const accessTitle = contentValue(
+    content,
+    "delivery.access.title",
+    "Six checks before delivery day.",
+  );
+  const accessBody = contentValue(
+    content,
+    "delivery.access.body",
+    "A container is a heavy, awkward load. These are the things the driver and crane operator will look at — better to find them now.",
+  );
+
   return (
     <>
       <JsonLd
@@ -66,16 +99,13 @@ export default function DeliveryPage() {
           />
           <div className="grid items-end gap-10 lg:grid-cols-12">
             <div className="lg:col-span-8">
-              <p className="eyebrow text-ember">Countrywide · Written quotes</p>
+              <p className="eyebrow text-ember">{heroEyebrow}</p>
               <h1 className="mt-5 font-display text-[clamp(2.8rem,6.4vw,5.4rem)] font-bold leading-[0.92] tracking-[-0.05em] text-bone">
-                Quoted to the gate<span className="text-ember">.</span>
-                <br />
-                Not to the yard.
+                {heroTitle}
+                <span className="text-ember">.</span>
               </h1>
               <p className="mt-7 max-w-xl text-[14px] leading-relaxed text-bone/55 sm:text-[15px]">
-                We deliver from our Nairobi yard to every county we can reach
-                safely. You get one written figure for the truck, crane and
-                offload — before the unit moves.
+                {heroBody}
               </p>
               <div className="mt-8 flex flex-wrap gap-2.5">
                 <QuoteButton size="lg" source="delivery-hero">
@@ -107,7 +137,7 @@ export default function DeliveryPage() {
                 ))}
               </div>
               <p className="mt-3 font-mono text-[8px] uppercase leading-relaxed tracking-[0.1em] text-bone/25">
-                {deliveryRegions.length} delivery regions · Including crane planning
+                Nairobi & upcountry · Crane planning
               </p>
             </div>
           </div>
@@ -156,12 +186,11 @@ export default function DeliveryPage() {
             <div>
               <p className="eyebrow text-ember">Coverage</p>
               <h2 className="mt-4 font-display text-[clamp(2rem,4.4vw,3.6rem)] font-bold leading-[1.02] tracking-[-0.045em] text-bone">
-                Where the truck goes.
+                {coverageTitle}
               </h2>
             </div>
             <p className="max-w-xs text-[12px] leading-relaxed text-bone/40">
-              Indicative from-prices for a standard container with crane offload.
-              Final quotes follow the access check.
+              {coverageBody}
             </p>
           </div>
           <KenyaMap />
@@ -174,11 +203,10 @@ export default function DeliveryPage() {
             <div className="lg:col-span-4">
               <p className="eyebrow text-ember-deep">Site access</p>
               <h2 className="mt-4 font-display text-[clamp(2rem,3.6vw,3rem)] font-bold leading-[1.02] tracking-[-0.045em] text-ink">
-                Six checks before delivery day.
+                {accessTitle}
               </h2>
               <p className="mt-4 max-w-sm text-[13px] leading-relaxed text-ink/55">
-                A container is a heavy, awkward load. These are the things the
-                driver and crane operator will look at — better to find them now.
+                {accessBody}
               </p>
             </div>
             <div className="grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:col-span-8">

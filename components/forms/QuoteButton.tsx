@@ -1,9 +1,9 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/Icons";
 import { buttonStyles } from "@/components/ui/Button";
 import { cn } from "@/lib/format";
-import { useQuote } from "./QuoteProvider";
 
 export function QuoteButton({
   children = "Get a quote",
@@ -22,14 +22,14 @@ export function QuoteButton({
   icon?: boolean;
   onOpen?: () => void;
 }) {
-  const { openQuote } = useQuote();
+  const router = useRouter();
 
   return (
     <button
       type="button"
       onClick={() => {
-        openQuote(source);
         onOpen?.();
+        router.push(`/enquire?source=${encodeURIComponent(source)}`);
       }}
       className={cn(buttonStyles({ variant, size, className }))}
     >

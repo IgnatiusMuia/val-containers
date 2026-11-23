@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { primaryImage, type Container } from "@/data/containers";
 import { cn, formatKES } from "@/lib/format";
+import { availabilityLabel } from "@/lib/containers/availability";
 import { Icon } from "@/components/ui/Icons";
 import { SmartImage } from "@/components/ui/SmartImage";
 
@@ -63,7 +64,7 @@ export function ContainerCard({
           ) : null}
         </div>
         <span className="absolute bottom-3 right-3 bg-ink/85 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-bone/60 backdrop-blur-sm">
-          Availability on request
+          {availabilityLabel(container)}
         </span>
       </div>
 

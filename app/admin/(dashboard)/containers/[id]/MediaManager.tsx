@@ -9,6 +9,7 @@ import {
   deleteMediaAction,
   finalizeMediaAction,
   moveMediaAction,
+  setCoverMediaAction,
   updateMediaAltAction,
 } from "@/lib/actions/media";
 import { buttonStyles } from "@/components/ui/Button";
@@ -152,7 +153,8 @@ export function MediaManager({
             Media
           </h2>
           <p className="mt-2 text-sm text-bone/50">
-            First item is the primary photo. Videos need a poster image.
+            The cover image is used first on the public site. Videos need a
+            poster image.
           </p>
         </div>
         <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-bone/30">
@@ -240,9 +242,9 @@ export function MediaManager({
                   <Icon name="play" className="h-5 w-5" />
                 </div>
               )}
-              {index === 0 ? (
+              {item.is_cover ? (
                 <span className="absolute left-1.5 top-1.5 bg-ember px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-[0.1em] text-ink">
-                  Primary
+                  Cover
                 </span>
               ) : null}
             </div>
@@ -270,6 +272,20 @@ export function MediaManager({
             </div>
 
             <div className="flex items-start gap-1.5 sm:justify-end">
+              <button
+                type="button"
+                disabled={busyId !== null || item.is_cover}
+                onClick={() =>
+                  void runMediaAction(item.id, () =>
+                    setCoverMediaAction(item.id),
+                  )
+                }
+                aria-label="Set as cover"
+                title="Set as cover"
+                className="grid h-8 w-8 place-items-center border border-bone/12 text-[10px] text-ember transition-colors hover:border-ember/40 disabled:opacity-25"
+              >
+                ★
+              </button>
               <button
                 type="button"
                 disabled={busyId !== null || index === 0}

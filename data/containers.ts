@@ -44,7 +44,20 @@ export interface Container {
   addedAt: string;
   stock: number;
   year: number;
-  status?: "available" | "reserved" | "sold";
+  id?: string;
+  status?:
+    | "available"
+    | "reserved"
+    | "sold"
+    | "unavailable"
+    | "inspection";
+  reference?: string;
+  currency?: string;
+  location?: string;
+  deliveryInfo?: string;
+  refrigerationStatus?: string;
+  verifiedAt?: string | null;
+  publicationStatus?: "draft" | "published" | "archived";
 }
 
 const image = (file: string, alt: string): ContainerMedia => ({

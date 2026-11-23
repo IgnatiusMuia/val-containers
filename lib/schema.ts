@@ -1,9 +1,28 @@
 import { site } from "@/data/site";
 import { containerImageUrls, type Container } from "@/data/containers";
+import { availabilitySchema } from "@/lib/containers/availability";
 import type { Faq } from "@/data/faqs";
 import type { BlogPost } from "@/data/blog";
+import type { SiteSettings } from "@/lib/site-settings";
 
 const businessId = `${site.url}/#business`;
+
+const fallbackSettings: SiteSettings = {
+  siteName: site.name,
+  tagline: site.tagline,
+  description: site.description,
+  email: site.email,
+  phoneDisplay: site.phoneDisplay,
+  phoneHref: site.phoneHref,
+  whatsappNumber: site.whatsappNumber,
+  addressLine: site.addressLine,
+  address: site.address,
+  city: site.city,
+  mapsUrl: site.mapsUrl,
+  mapsEmbed: site.mapsEmbed,
+  hours: site.hours,
+  hoursShort: site.hoursShort,
+};
 
 function absoluteMediaUrl(src: string) {
   if (!src) return "";
@@ -11,52 +30,35 @@ function absoluteMediaUrl(src: string) {
   return `${site.url}${src.startsWith("/") ? src : `/${src}`}`;
 }
 
-function schemaAvailability(status?: Container["status"]) {
-  if (status === "sold") return "https://schema.org/SoldOut";
-  if (status === "available") return "https://schema.org/InStock";
-  return "https://schema.org/LimitedAvailability";
-}
-
-export function localBusinessSchema() {
+export function localBusinessSchema(
+  settings: SiteSettings = fallbackSettings,
+  priceRange: string = site.priceRange,
+) {
   return {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "@id": businessId,
-    name: site.name,
-    description: site.description,
-    slogan: site.tagline,
+    name: settings.siteName,
+    description: settings.description,
+    slogan: settings.tagline,
     url: site.url,
-    telephone: site.phoneDisplay,
-    email: site.email,
+    telephone: settings.phoneDisplay,
+    email: settings.email,
     image: `${site.url}/opengraph-image`,
-    priceRange: site.priceRange,
+    priceRange,
     currenciesAccepted: "KES",
     paymentAccepted: "M-Pesa, Bank transfer",
     address: {
       "@type": "PostalAddress",
-      streetAddress: site.addressLine,
-      addressLocality: site.city,
+      streetAddress: settings.addressLine,
+      addressLocality: settings.city,
       addressCountry: "KE",
-    },
-    openingHoursSpecification: {
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday",
-      ],
-      opens: "00:00",
-      closes: "23:59",
     },
     areaServed: {
       "@type": "Country",
       name: "Kenya",
     },
-    hasMap: site.mapsUrl,
+    hasMap: settings.mapsUrl,
     knowsAbout: [
       "shipping containers",
       "container offices",
@@ -67,13 +69,13 @@ export function localBusinessSchema() {
   };
 }
 
-export function websiteSchema() {
+export function websiteSchema(settings: SiteSettings = fallbackSettings) {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: site.name,
+    name: settings.siteName,
     url: site.url,
-    description: site.description,
+    description: settings.description,
     publisher: { "@id": businessId },
   };
 }
@@ -85,7 +87,7 @@ export function productSchema(container: Container) {
     name: container.name,
     description: container.description,
     image: containerImageUrls(container).map(absoluteMediaUrl).filter(Boolean),
-    sku: `VC-${container.slug.toUpperCase()}`,
+    sku: container.reference ?? `VC-${container.slug.toUpperCase()}`,
     brand: {
       "@type": "Brand",
       name: site.name,
@@ -99,9 +101,9 @@ export function productSchema(container: Container) {
     offers: {
       "@type": "Offer",
       url: `${site.url}/containers/${container.slug}`,
-      priceCurrency: "KES",
+      priceCurrency: container.currency ?? "KES",
       price: container.price,
-      availability: schemaAvailability(container.status),
+      availability: availabilitySchema(container),
       itemCondition:
         container.condition === "new"
           ? "https://schema.org/NewCondition"

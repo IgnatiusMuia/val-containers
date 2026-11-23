@@ -1,14 +1,13 @@
 import "server-only";
 
 import { cacheLife, cacheTag } from "next/cache";
-import {
-  containers as staticContainers,
-  type Container,
-} from "@/data/containers";
+import type { Container } from "@/data/containers";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 import { mapContainerRow } from "@/lib/containers/mapper";
 
 const CONTAINER_SELECT = `
+  id,
+  reference,
   slug,
   name,
   short_name,
@@ -18,6 +17,12 @@ const CONTAINER_SELECT = `
   condition_label,
   grade,
   price,
+  currency,
+  location,
+  delivery_info,
+  refrigeration_status,
+  verified_at,
+  publication_status,
   description,
   highlights,
   specs,
@@ -32,8 +37,22 @@ const CONTAINER_SELECT = `
   status,
   published_at,
   updated_at,
-  container_media ( kind, src, alt, poster, position )
+  container_media ( kind, src, alt, poster, position, is_cover )
 `;
+
+export interface ContainerStats {
+  total: number;
+  available: number;
+  reserved: number;
+  units: number;
+  plain: number;
+  fabricated: number;
+  refrigerated: number;
+  featured: number;
+  minPrice: number;
+  maxPrice: number;
+  latestUpdate: string;
+}
 
 export async function getContainers(): Promise<Container[]> {
   "use cache";
@@ -41,27 +60,49 @@ export async function getContainers(): Promise<Container[]> {
   cacheLife("hours");
 
   const supabase = createSupabasePublicClient();
-  if (!supabase) return staticContainers;
+  if (!supabase) return [];
 
-  try {
-    const { data, error } = await supabase
-      .from("containers")
-      .select(CONTAINER_SELECT)
-      .in("status", ["available", "reserved", "sold"])
-      .order("published_at", { ascending: false, nullsFirst: false });
+  const { data, error } = await supabase
+    .from("containers")
+    .select(CONTAINER_SELECT)
+    .eq("publication_status", "published")
+    .in("status", ["available", "reserved", "inspection"])
+    .order("published_at", { ascending: false, nullsFirst: false });
 
-    if (error) {
-      console.error(`Could not load containers from Supabase: ${error.message}`);
-      return staticContainers;
-    }
-
-    return (data ?? [])
-      .map(mapContainerRow)
-      .filter((container): container is Container => container !== null);
-  } catch (cause) {
-    console.error("Could not load containers from Supabase:", cause);
-    return staticContainers;
+  if (error) {
+    console.error(`Could not load containers from Supabase: ${error.message}`);
+    return [];
   }
+
+  return (data ?? [])
+    .map(mapContainerRow)
+    .filter((container): container is Container => container !== null);
+}
+
+export async function getContainerStats(): Promise<ContainerStats> {
+  const containers = await getContainers();
+
+  return {
+    total: containers.length,
+    available: containers.filter((item) => item.status === "available").length,
+    reserved: containers.filter((item) => item.status === "reserved").length,
+    units: containers.reduce((sum, item) => sum + item.stock, 0),
+    plain: containers.filter((item) => item.type === "plain").length,
+    fabricated: containers.filter((item) => item.type === "fabricated").length,
+    refrigerated: containers.filter((item) => item.type === "refrigerated")
+      .length,
+    featured: containers.filter((item) => item.featured).length,
+    minPrice: containers.length
+      ? Math.min(...containers.map((item) => item.price))
+      : 0,
+    maxPrice: containers.length
+      ? Math.max(...containers.map((item) => item.price))
+      : 0,
+    latestUpdate: containers.reduce(
+      (latest, item) => (item.addedAt > latest ? item.addedAt : latest),
+      containers[0]?.addedAt ?? "",
+    ),
+  };
 }
 
 export async function getContainer(slug: string) {
@@ -79,10 +120,7 @@ export async function getContainerSlugs() {
   return all.map((container) => container.slug);
 }
 
-export async function getRelatedContainers(
-  container: Container,
-  limit = 4,
-) {
+export async function getRelatedContainers(container: Container, limit = 4) {
   const all = await getContainers();
 
   return all

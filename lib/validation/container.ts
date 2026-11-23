@@ -6,8 +6,17 @@ export const containerStatuses = [
   "reserved",
   "sold",
   "archived",
+  "unavailable",
+  "inspection",
 ] as const;
 
+export const publicationStatuses = ["draft", "published", "archived"] as const;
+export const refrigerationStatuses = [
+  "not_applicable",
+  "unverified",
+  "working",
+  "needs_service",
+] as const;
 export const containerTypes = ["plain", "fabricated", "refrigerated"] as const;
 export const containerSizes = ["20ft", "40ft", "40ft-hc"] as const;
 export const containerConditions = ["new", "used"] as const;
@@ -26,9 +35,20 @@ export const containerFormSchema = z.object({
   conditionLabel: z.string().trim().optional(),
   grade: z.string().trim().optional(),
   price: z.coerce.number().int().nonnegative(),
+  currency: z.string().trim().regex(/^[A-Z]{3}$/, "Use a 3-letter currency code."),
+  location: z.string().trim().min(1, "Location is required."),
+  deliveryInfo: z.string().trim(),
+  refrigerationStatus: z.enum(refrigerationStatuses),
+  lastInspectedAt: z
+    .string()
+    .trim()
+    .refine((value) => !value || !Number.isNaN(Date.parse(value)), "Use a valid date.")
+    .optional(),
+  verified: z.boolean(),
   stock: z.coerce.number().int().nonnegative(),
   year: z.coerce.number().int().min(1990).max(2100),
   status: z.enum(containerStatuses),
+  publicationStatus: z.enum(publicationStatuses),
   featured: z.boolean(),
   photosAreRepresentative: z.boolean(),
   description: z.string().trim().min(1, "Description is required."),
@@ -86,9 +106,16 @@ export function parseContainerForm(formData: FormData) {
     conditionLabel: readString(formData.get("conditionLabel")) || undefined,
     grade: readString(formData.get("grade")) || undefined,
     price: readString(formData.get("price")),
+    currency: readString(formData.get("currency")) || "KES",
+    location: readString(formData.get("location")),
+    deliveryInfo: readString(formData.get("deliveryInfo")),
+    refrigerationStatus: readString(formData.get("refrigerationStatus")),
+    lastInspectedAt: readString(formData.get("lastInspectedAt")) || undefined,
+    verified: formData.get("verified") === "on",
     stock: readString(formData.get("stock")),
     year: readString(formData.get("year")),
     status: readString(formData.get("status")),
+    publicationStatus: readString(formData.get("publicationStatus")),
     featured: formData.get("featured") === "on",
     photosAreRepresentative:
       formData.get("photosAreRepresentative") === "on",

@@ -4,14 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { nav, site } from "@/data/site";
+import { nav } from "@/data/site";
+import type { SiteSettings } from "@/lib/site-settings";
 import { cn } from "@/lib/format";
 import { waMessages, waLink } from "@/lib/whatsapp";
 import { Icon } from "@/components/ui/Icons";
 import { Logo } from "@/components/ui/Logo";
 import { QuoteButton } from "@/components/forms/QuoteButton";
 
-export function Navbar() {
+export function Navbar({ settings }: { settings: SiteSettings }) {
   const pathname = usePathname();
   const reduce = useReducedMotion();
   const [scrolled, setScrolled] = useState(false);
@@ -81,33 +82,33 @@ export function Navbar() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-whatsapp opacity-60" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-whatsapp" />
             </span>
-            Open 24/7 · Nairobi yard
+            {settings.hours} · Nairobi yard
           </p>
           <div className="flex items-center gap-5">
             <a
-              href={site.mapsUrl}
+              href={settings.mapsUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 transition-colors hover:text-bone"
             >
               <Icon name="pin" className="h-3 w-3" />
-              {site.addressLine}
+              {settings.addressLine}
             </a>
             <span className="h-3 w-px bg-bone/15" aria-hidden="true" />
             <a
-              href={site.phoneHref}
+              href={settings.phoneHref}
               className="flex items-center gap-1.5 transition-colors hover:text-bone"
             >
               <Icon name="phone" className="h-3 w-3" />
-              {site.phoneDisplay}
+              {settings.phoneDisplay}
             </a>
             <span className="hidden h-3 w-px bg-bone/15 xl:block" aria-hidden="true" />
             <a
-              href={`mailto:${site.email}`}
+              href={`mailto:${settings.email}`}
               className="hidden items-center gap-1.5 transition-colors hover:text-bone xl:flex"
             >
               <Icon name="mail" className="h-3 w-3" />
-              {site.email}
+              {settings.email}
             </a>
           </div>
         </div>
@@ -161,11 +162,11 @@ export function Navbar() {
 
           <div className="flex items-center gap-2.5">
             <a
-              href={site.phoneHref}
+              href={settings.phoneHref}
               className="hidden items-center gap-2 pr-2 font-mono text-[11px] tracking-[0.06em] text-bone/60 transition-colors hover:text-bone xl:flex"
             >
               <Icon name="phone" className="h-3.5 w-3.5" />
-              {site.phoneDisplay}
+              {settings.phoneDisplay}
             </a>
             <div className="hidden sm:block">
               <QuoteButton
@@ -275,7 +276,7 @@ export function Navbar() {
 
                 <div className="mt-6 border border-bone/12">
                   <a
-                    href={waLink(waMessages.general)}
+                    href={waLink(waMessages.general, settings.whatsappNumber)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 border-b border-bone/10 px-4 py-3.5 transition-colors hover:bg-ink/60"
@@ -284,7 +285,7 @@ export function Navbar() {
                     <span className="flex-1">
                       <span className="block text-[13px] text-bone/85">WhatsApp</span>
                       <span className="block text-[10px] text-bone/40">
-                        Fastest reply, 24/7
+                        Direct WhatsApp line
                       </span>
                     </span>
                     <Icon
@@ -293,14 +294,14 @@ export function Navbar() {
                     />
                   </a>
                   <a
-                    href={site.phoneHref}
+                    href={settings.phoneHref}
                     className="flex items-center gap-3 border-b border-bone/10 px-4 py-3.5 transition-colors hover:bg-ink/60"
                   >
                     <Icon name="phone" className="h-4 w-4 text-ember" />
                     <span className="flex-1">
                       <span className="block text-[13px] text-bone/85">Call the yard</span>
                       <span className="block text-[10px] text-bone/40">
-                        {site.phoneDisplay}
+                        {settings.phoneDisplay}
                       </span>
                     </span>
                     <Icon
@@ -309,7 +310,7 @@ export function Navbar() {
                     />
                   </a>
                   <a
-                    href={site.mapsUrl}
+                    href={settings.mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-ink/60"
@@ -320,7 +321,7 @@ export function Navbar() {
                         Directions
                       </span>
                       <span className="block text-[10px] text-bone/40">
-                        {site.addressLine}
+                        {settings.addressLine}
                       </span>
                     </span>
                     <Icon
@@ -331,7 +332,7 @@ export function Navbar() {
                 </div>
 
                 <p className="mt-6 font-mono text-[9px] uppercase leading-relaxed tracking-[0.14em] text-bone/30">
-                  {site.hours} · {site.address}
+                  {settings.hours} · {settings.address}
                 </p>
               </div>
             </motion.div>

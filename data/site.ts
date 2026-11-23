@@ -17,8 +17,8 @@ export const site = {
   mapsUrl: "https://maps.google.com/?q=MVQ6+VHV+Nairobi+Kenya",
   mapsEmbed:
     "https://maps.google.com/maps?q=MVQ6%2BVHV%20Nairobi%20Kenya&z=16&output=embed",
-  hours: "Open 24 hours, 7 days a week",
-  hoursShort: "Open 24/7",
+  hours: "Call to confirm current yard hours",
+  hoursShort: "Nairobi yard",
   priceRange: "KES 185,000 – 2,450,000",
   foundedNote: "Nairobi yard · Countrywide delivery",
 } as const;
@@ -32,21 +32,16 @@ export const nav = [
   { href: "/blog", label: "Blog" },
 ] as const;
 
-export const stats = [
-  { value: 12, suffix: "", label: "Listings online" },
-  { value: 9, suffix: "", label: "Delivery regions" },
-  { value: 24, suffix: "/7", label: "Yard access" },
-  { value: 1, suffix: "", label: "Written quote" },
-] as const;
-
 export const trustPoints = [
   "Published prices",
-  "Countrywide delivery",
-  "Written quotes",
+  "Condition notes",
   "Yard inspection",
-  "Open 24 hours",
+  "Delivery planning",
   "Direct WhatsApp line",
+  "Written quotes",
 ] as const;
+
+
 
 export const quickActions = [
   {

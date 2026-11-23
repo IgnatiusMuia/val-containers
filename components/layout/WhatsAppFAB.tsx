@@ -1,10 +1,14 @@
 import { waLink, waMessages } from "@/lib/whatsapp";
 import { Icon } from "@/components/ui/Icons";
 
-export function WhatsAppFAB() {
+export function WhatsAppFAB({
+  whatsappNumber,
+}: {
+  whatsappNumber?: string;
+}) {
   return (
     <a
-      href={waLink(waMessages.general)}
+      href={waLink(waMessages.general, whatsappNumber)}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat with Val Containers on WhatsApp"

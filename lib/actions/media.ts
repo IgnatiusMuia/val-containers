@@ -75,7 +75,7 @@ export async function createMediaUploadAction(
   containerId: string,
   fileName: string,
 ): Promise<MediaActionState> {
-  await requireAdmin();
+  await requireAdmin("media");
 
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { error: "Supabase is not configured." };
@@ -109,7 +109,7 @@ export async function finalizeMediaAction({
   alt: string;
   posterPath?: string;
 }): Promise<MediaActionState> {
-  await requireAdmin();
+  await requireAdmin("media");
 
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { error: "Supabase is not configured." };
@@ -179,6 +179,11 @@ export async function finalizeMediaAction({
     .limit(1)
     .maybeSingle();
 
+  const { count } = await supabase
+    .from("container_media")
+    .select("id", { count: "exact", head: true })
+    .eq("container_id", containerId);
+
   const { error: insertError } = await supabase.from("container_media").insert({
     container_id: containerId,
     kind,
@@ -188,6 +193,7 @@ export async function finalizeMediaAction({
     poster,
     poster_path: posterStoragePath,
     position: (last?.position ?? -1) + 1,
+    is_cover: (count ?? 0) === 0,
   });
 
   if (insertError) {
@@ -201,11 +207,48 @@ export async function finalizeMediaAction({
   return { ok: true };
 }
 
+export async function setCoverMediaAction(
+  mediaId: string,
+): Promise<MediaActionState> {
+  await requireAdmin("media");
+
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const { data: media, error: findError } = await supabase
+    .from("container_media")
+    .select("container_id")
+    .eq("id", mediaId)
+    .maybeSingle();
+
+  if (findError || !media) {
+    return { error: findError?.message ?? "Media not found." };
+  }
+
+  const { error: clearError } = await supabase
+    .from("container_media")
+    .update({ is_cover: false })
+    .eq("container_id", media.container_id);
+
+  if (clearError) return { error: clearError.message };
+
+  const { error } = await supabase
+    .from("container_media")
+    .update({ is_cover: true })
+    .eq("id", mediaId);
+
+  if (error) return { error: error.message };
+
+  const slug = await getContainerSlug(media.container_id);
+  if (slug) invalidateContainer(slug);
+  return { ok: true };
+}
+
 export async function updateMediaAltAction(
   mediaId: string,
   alt: string,
 ): Promise<MediaActionState> {
-  await requireAdmin();
+  await requireAdmin("media");
 
   const cleanAlt = alt.trim();
   if (cleanAlt.length < 3) return { error: "Add meaningful alt text." };
@@ -237,7 +280,7 @@ export async function updateMediaAltAction(
 export async function deleteMediaAction(
   mediaId: string,
 ): Promise<MediaActionState> {
-  await requireAdmin();
+  await requireAdmin("media");
 
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { error: "Supabase is not configured." };
@@ -270,7 +313,7 @@ export async function moveMediaAction(
   mediaId: string,
   direction: "up" | "down",
 ): Promise<MediaActionState> {
-  await requireAdmin();
+  await requireAdmin("media");
 
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { error: "Supabase is not configured." };

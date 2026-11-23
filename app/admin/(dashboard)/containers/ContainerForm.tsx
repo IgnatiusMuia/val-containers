@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { ContainerSpecs } from "@/data/containers";
 import {
   initialContainerActionState,
@@ -11,6 +11,7 @@ import { buttonStyles } from "@/components/ui/Button";
 
 export interface ContainerFormValues {
   id?: string;
+  reference?: string;
   slug: string;
   name: string;
   shortName: string;
@@ -20,9 +21,27 @@ export interface ContainerFormValues {
   conditionLabel: string;
   grade: string;
   price: number;
+  currency: string;
+  location: string;
+  deliveryInfo: string;
+  refrigerationStatus:
+    | "not_applicable"
+    | "unverified"
+    | "working"
+    | "needs_service";
+  lastInspectedAt: string;
+  verified: boolean;
   stock: number;
   year: number;
-  status: "draft" | "available" | "reserved" | "sold" | "archived";
+  status:
+    | "draft"
+    | "available"
+    | "reserved"
+    | "sold"
+    | "archived"
+    | "unavailable"
+    | "inspection";
+  publicationStatus: "draft" | "published" | "archived";
   featured: boolean;
   photosAreRepresentative: boolean;
   description: string;
@@ -86,6 +105,7 @@ export function ContainerForm({
     action,
     initialContainerActionState,
   );
+  const [currency, setCurrency] = useState(initial.currency);
 
   return (
     <form action={formAction} className="space-y-5">
@@ -98,6 +118,11 @@ export function ContainerForm({
       ) : null}
 
       <Section title="Identity">
+        {initial.reference ? (
+          <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.14em] text-bone/35">
+            Reference <span className="text-bone/70">{initial.reference}</span>
+          </p>
+        ) : null}
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className={labelClass} htmlFor="name">
@@ -140,20 +165,70 @@ export function ContainerForm({
             <FieldError errors={state.fieldErrors} name="slug" />
           </div>
           <div>
+            <label className={labelClass} htmlFor="publicationStatus">
+              Publication
+            </label>
+            <select
+              id="publicationStatus"
+              name="publicationStatus"
+              defaultValue={initial.publicationStatus}
+              className={inputClass}
+            >
+              <option value="draft">Draft — not public</option>
+              <option value="published">Published — visible on site</option>
+              <option value="archived">Archived — hidden</option>
+            </select>
+          </div>
+          <div>
             <label className={labelClass} htmlFor="status">
-              Status
+              Availability
             </label>
             <select
               id="status"
               name="status"
-              defaultValue={initial.status}
+              defaultValue={
+                ["available", "reserved", "sold", "unavailable", "inspection"].includes(
+                  initial.status,
+                )
+                  ? initial.status
+                  : "available"
+              }
               className={inputClass}
             >
-              <option value="draft">Draft</option>
               <option value="available">Available</option>
               <option value="reserved">Reserved</option>
               <option value="sold">Sold</option>
-              <option value="archived">Archived</option>
+              <option value="unavailable">Unavailable</option>
+              <option value="inspection">Inspection only</option>
+            </select>
+          </div>
+          <div>
+            <label className={labelClass} htmlFor="location">
+              Location
+            </label>
+            <input
+              id="location"
+              name="location"
+              required
+              defaultValue={initial.location}
+              placeholder="Nairobi yard"
+              className={inputClass}
+            />
+            <FieldError errors={state.fieldErrors} name="location" />
+          </div>
+          <div>
+            <label className={labelClass} htmlFor="currency">
+              Currency
+            </label>
+            <select
+              id="currency"
+              name="currency"
+              value={currency}
+              onChange={(event) => setCurrency(event.target.value)}
+              className={inputClass}
+            >
+              <option value="KES">KES</option>
+              <option value="USD">USD</option>
             </select>
           </div>
         </div>
@@ -246,7 +321,7 @@ export function ContainerForm({
           </div>
           <div>
             <label className={labelClass} htmlFor="price">
-              Price (KES)
+              Price ({currency})
             </label>
             <input
               id="price"
@@ -274,7 +349,45 @@ export function ContainerForm({
               className={inputClass}
             />
           </div>
+          <div>
+            <label className={labelClass} htmlFor="refrigerationStatus">
+              Refrigeration
+            </label>
+            <select
+              id="refrigerationStatus"
+              name="refrigerationStatus"
+              defaultValue={initial.refrigerationStatus}
+              className={inputClass}
+            >
+              <option value="not_applicable">Not applicable</option>
+              <option value="unverified">Unverified</option>
+              <option value="working">Working — tested</option>
+              <option value="needs_service">Needs service</option>
+            </select>
+          </div>
+          <div>
+            <label className={labelClass} htmlFor="lastInspectedAt">
+              Last inspected
+            </label>
+            <input
+              id="lastInspectedAt"
+              name="lastInspectedAt"
+              type="date"
+              defaultValue={initial.lastInspectedAt}
+              className={inputClass}
+            />
+            <FieldError errors={state.fieldErrors} name="lastInspectedAt" />
+          </div>
           <div className="flex flex-col justify-end gap-3 pb-1">
+            <label className="flex items-center gap-2 text-xs text-bone/65">
+              <input
+                type="checkbox"
+                name="verified"
+                defaultChecked={initial.verified}
+                className="h-4 w-4 accent-ember"
+              />
+              Verified by the yard
+            </label>
             <label className="flex items-center gap-2 text-xs text-bone/65">
               <input
                 type="checkbox"
@@ -294,6 +407,19 @@ export function ContainerForm({
               Photos are yard examples
             </label>
           </div>
+        </div>
+        <div className="mt-4">
+          <label className={labelClass} htmlFor="deliveryInfo">
+            Delivery notes
+          </label>
+          <textarea
+            id="deliveryInfo"
+            name="deliveryInfo"
+            rows={2}
+            defaultValue={initial.deliveryInfo}
+            placeholder="Delivery and offload are quoted after the site access check."
+            className={textareaClass}
+          />
         </div>
       </Section>
 

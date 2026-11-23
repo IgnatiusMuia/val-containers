@@ -1,9 +1,11 @@
-import { site } from "@/data/site";
+import { getSiteSettings } from "@/lib/content";
 import { ButtonLink } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icons";
 import { QuoteButton } from "@/components/forms/QuoteButton";
 
-export function CtaBand() {
+export async function CtaBand() {
+  const settings = await getSiteSettings();
+
   return (
     <section className="relative overflow-hidden bg-ember text-ink">
       <div className="ribs-light absolute inset-0 opacity-70" aria-hidden="true" />
@@ -35,17 +37,17 @@ export function CtaBand() {
               Browse the fleet
             </ButtonLink>
             <a
-              href={site.phoneHref}
+              href={settings.phoneHref}
               className="mt-2 inline-flex items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-[0.12em] text-ink/60 transition-colors hover:text-ink"
             >
               <Icon name="phone" className="h-3 w-3" />
-              Or call {site.phoneDisplay}
+              Or call {settings.phoneDisplay}
             </a>
           </div>
         </div>
 
         <div className="mt-12 flex flex-col gap-3 border-t border-ink/20 pt-5 font-mono text-[9px] uppercase tracking-[0.13em] text-ink/50 sm:flex-row sm:items-center sm:justify-between">
-          <span>Nairobi yard · Open 24/7</span>
+          <span>Nairobi yard · {settings.hours}</span>
           <span>Countrywide delivery · Written quotes</span>
           <span>Condition notes on request</span>
         </div>

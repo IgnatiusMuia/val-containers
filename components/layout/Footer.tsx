@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { footerLinks, site } from "@/data/site";
+import { footerLinks } from "@/data/site";
+import type { SiteSettings } from "@/lib/site-settings";
 import { Icon } from "@/components/ui/Icons";
 import { Logo } from "@/components/ui/Logo";
 import { waLink, waMessages } from "@/lib/whatsapp";
@@ -10,7 +11,7 @@ const columns = [
   { title: "Company", links: footerLinks.company },
 ] as const;
 
-export function Footer() {
+export function Footer({ settings }: { settings: SiteSettings }) {
   const year = 2026;
 
   return (
@@ -26,13 +27,13 @@ export function Footer() {
               <Logo />
             </Link>
             <p className="mt-5 max-w-sm text-[14px] leading-relaxed text-bone/55">
-              {site.tagline}
+              {settings.tagline}
             </p>
 
             <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-[0.14em] text-bone/40">
               <span className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-whatsapp" />
-                {site.hoursShort}
+                {settings.hours}
               </span>
               <span className="h-3 w-px bg-bone/15" aria-hidden="true" />
               <span>Nairobi yard</span>
@@ -43,14 +44,14 @@ export function Footer() {
             <div className="mt-8">
               <p className="eyebrow text-bone/35">Talk to the yard</p>
               <a
-                href={site.phoneHref}
+                href={settings.phoneHref}
                 className="mt-3 inline-flex items-center gap-3 font-display text-[26px] font-semibold tracking-[-0.03em] text-bone transition-colors hover:text-ember sm:text-[30px]"
               >
                 <Icon name="phone" className="h-5 w-5 text-ember" />
-                {site.phoneDisplay}
+                {settings.phoneDisplay}
               </a>
               <a
-                href={waLink(waMessages.general)}
+                href={waLink(waMessages.general, settings.whatsappNumber)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-2 flex items-center gap-3 text-[13px] text-bone/55 transition-colors hover:text-bone"
@@ -59,11 +60,11 @@ export function Footer() {
                 WhatsApp the yard
               </a>
               <a
-                href={`mailto:${site.email}`}
+                href={`mailto:${settings.email}`}
                 className="mt-2 flex items-center gap-3 text-[13px] text-bone/55 transition-colors hover:text-bone"
               >
                 <Icon name="mail" className="h-4 w-4 text-bone/45" />
-                {site.email}
+                {settings.email}
               </a>
             </div>
           </div>
@@ -92,14 +93,14 @@ export function Footer() {
             <h3 className="eyebrow text-bone/35">Find the yard</h3>
             <address className="mt-4 not-italic">
               <p className="text-[13px] leading-relaxed text-bone/55">
-                {site.addressLine}
+                {settings.addressLine}
                 <br />
-                {site.address}
+                {settings.address}
               </p>
             </address>
             <div className="mt-4 overflow-hidden border border-bone/12">
               <iframe
-                src={site.mapsEmbed}
+                src={settings.mapsEmbed}
                 title="Map showing Val Containers yard in Nairobi"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
@@ -107,7 +108,7 @@ export function Footer() {
               />
             </div>
             <a
-              href={site.mapsUrl}
+              href={settings.mapsUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="group mt-3 inline-flex items-center gap-2 text-[12px] font-medium text-bone/70 transition-colors hover:text-bone"

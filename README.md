@@ -33,7 +33,11 @@ npm run admin:invite # allowlist an Auth user by email
 
 ## Media pipeline
 
-The site ships with local media in `public/media`. Admin uploads are stored in the Supabase `container-media` bucket and served from the Supabase project's public storage URL. The static catalogue still uses the local files.
+The site ships with local media in `public/media`. Seeded catalogue rows point at
+those local files. Admin uploads are stored in the public Supabase
+`container-media` bucket and served from the project's public storage URL.
+Customer photos attached to enquiries go to the private `enquiry-media` bucket
+and are shown to admins through short-lived signed URLs.
 
 ```
 public/media/images/   # JPG photos, grouped by yard, interiors, homes, delivery
@@ -108,14 +112,30 @@ NEXT_PUBLIC_SITE_URL=https://val-containers.vercel.app
 
 ## Admin and Supabase
 
-When Supabase is configured, the public catalogue, listing pages and sitemap
-read from the `containers` and `container_media` tables. Without credentials the
-site falls back to the static listings in `data/containers.ts`. If a Supabase
-query fails, the public site also falls back to those static listings.
+Supabase is the only source for the public catalogue, FAQs, gallery,
+announcements and editable page copy. `data/containers.ts` and `data/faqs.ts`
+remain the seed inputs for `npm run db:seed`, but they are not used as a runtime
+fallback. If Supabase is not configured, or a query fails, the catalogue, FAQs
+and gallery render empty rather than showing stale seed data. Site settings fall
+back to the defaults in `data/site.ts`.
 
-The admin area at `/admin` supports listing CRUD, image and video uploads, media
-ordering and lead status updates. Access is restricted to users in
-`public.admin_users`.
+The admin area at `/admin` includes:
+
+- **Inventory** — create, edit, duplicate and archive listings; draft/published/archived
+  publication states; `available`, `reserved`, `sold`, `unavailable` and
+  `inspection` availability; cover media; verification details.
+- **Enquiries** — inbox, statuses, notes, quotations and photo attachments with
+  reference numbers. The old `leads` table is no longer used by the admin UI.
+- **Media** — search across uploaded photos and videos, edit alt text, set covers
+  and delete files.
+- **Content** — page copy with draft/publish, FAQs and the yard gallery.
+- **Settings and team** — owner-only contact details, announcement bar, and team
+  invitations with per-area permissions (`inventory`, `media`, `enquiries`,
+  `content`).
+
+Access requires an active row in `public.admin_users`. Admin sessions sign out
+after 8 hours of inactivity, and both email/password and magic-link sign-in are
+supported. The magic-link and password-reset callback is `/auth/callback`.
 
 Add these to `.env.local` and to the Vercel project:
 
@@ -125,18 +145,32 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```
 
-`SUPABASE_SERVICE_ROLE_KEY` is server-only. Never expose it with a
-`NEXT_PUBLIC_` prefix or import it into a Client Component.
+The Vercel Marketplace Supabase integration uses the newer names
+`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and `SUPABASE_SECRET_KEY`. The app accepts
+either the legacy or Marketplace key names.
+
+The service/secret key is server-only. Never expose it with a `NEXT_PUBLIC_`
+prefix or import it into a Client Component. Enquiry attachments, login rate
+limiting and team management also require it at runtime.
 
 ### First-time setup
 
-1. Create a Supabase project.
-2. Open the SQL editor and run
-   `supabase/migrations/202611230001_initial.sql`.
+1. Create a Supabase project, or install the Supabase integration from the
+   Vercel Marketplace and connect it to this Vercel project.
+2. Apply the migrations in order from the SQL editor:
+
+   ```text
+   supabase/migrations/202611230001_initial.sql
+   supabase/migrations/202611240001_admin_cms.sql
+   supabase/migrations/202611240002_availability_status.sql
+   supabase/migrations/202611240003_public_inspection.sql
+   ```
+
 3. Add the environment variables above to `.env.local` and to the Vercel
    project.
-4. Seed the existing listings. Re-running this is safe: existing listings and
-   uploaded media are left untouched.
+4. Seed the listings and their local media. New rows are inserted as published
+   listings. Re-running this is safe: existing listings and uploaded media are
+   left untouched.
 
    ```bash
    npm run db:seed
@@ -156,12 +190,16 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
    npm run admin:invite -- owner@example.com owner
    ```
 
-6. Reload the app and sign in at `/admin/login`.
+6. Reload the app and sign in at `/admin/login`. Owners can then invite the
+   rest of the team from **Settings → Team**.
 
-The migration creates the `containers`, `container_media`, `leads`,
-`admin_users` and `audit_log` tables, RLS policies, the `container-media`
-storage bucket, and audit triggers. Public requests can read available,
-reserved and sold containers only; the admin allowlist controls writes.
+The migrations create the inventory, enquiry, content, team and audit tables,
+RLS policies, the `auth_rate_limits` table, the public `container-media` bucket
+and the private `enquiry-media` bucket. Public requests can read published
+containers with `available`, `reserved` or `inspection` availability only;
+`sold` and `unavailable` listings stay private. The admin allowlist controls
+writes.
 
-Email/password and magic-link sign-in are both supported. The magic-link
-callback is `/auth/callback`.
+The CMS migration seeds the starting FAQs, gallery items, page copy and site
+settings, so the public site has content immediately after setup. Edit those
+from `/admin` afterwards.

@@ -1,37 +1,29 @@
+import { contentValue, getGalleryItems, getSiteContent } from "@/lib/content";
 import { ButtonLink } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icons";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { SmartImage } from "@/components/ui/SmartImage";
 
-const work = [
-  {
-    title: "Retail kiosks",
-    caption: "Red kiosk units lined up in the yard.",
-    image: "/media/images/yard/kiosk-row-red.jpg",
-    alt: "Red container retail kiosks with white roller shutters",
-  },
-  {
-    title: "Site offices",
-    caption: "Finished office interior with glazing and a timber floor.",
-    image: "/media/images/interiors/office-interior.jpg",
-    alt: "Finished container office interior with glass doors and timber floor",
-  },
-  {
-    title: "Container homes",
-    caption: "Clad container home with a timber veranda.",
-    image: "/media/images/homes/container-home-exterior.jpg",
-    alt: "Container home exterior with a timber veranda",
-  },
-  {
-    title: "Yard stock",
-    caption: "High cube containers stacked and ready for inspection.",
-    image: "/media/images/yard/container-stack-high-cube.jpg",
-    alt: "High cube containers stacked in the yard",
-  },
-] as const;
+export async function YardGallery() {
+  const [items, content] = await Promise.all([
+    getGalleryItems(),
+    getSiteContent(),
+  ]);
+  if (items.length === 0) return null;
 
-export function RecentWork() {
+  const label = contentValue(content, "home.gallery.eyebrow", "From the yard");
+  const heading = contentValue(
+    content,
+    "home.gallery.title",
+    "Yard examples, not stock photos.",
+  );
+  const description = contentValue(
+    content,
+    "home.gallery.body",
+    "A look at units and fit-outs from the yard. Ask for current photos and the inspection sheet for the exact container you are considering.",
+  );
+
   return (
     <section className="relative overflow-hidden border-y border-bone/10 bg-ink py-20 sm:py-28">
       <div className="ribs absolute inset-0 opacity-50" aria-hidden="true" />
@@ -39,14 +31,9 @@ export function RecentWork() {
         <Reveal>
           <SectionHeading
             index="05"
-            label="Recent work"
-            title={
-              <>
-                Yard work,
-                <br className="hidden sm:block" /> not stock photos.
-              </>
-            }
-            description="A look at recent units we have handled. Ask for current photos and the inspection sheet for the exact container you are considering."
+            label={label}
+            title={heading}
+            description={description}
             action={
               <ButtonLink href="/containers" variant="outline" size="md">
                 See current listings
@@ -56,11 +43,11 @@ export function RecentWork() {
         </Reveal>
 
         <div className="mt-12 grid gap-4 sm:grid-cols-2">
-          {work.map((item, index) => (
-            <Reveal key={item.title} delay={index * 0.05}>
+          {items.slice(0, 4).map((item, index) => (
+            <Reveal key={item.id} delay={index * 0.05}>
               <figure className="group border border-bone/12 bg-coal">
                 <SmartImage
-                  src={item.image}
+                  src={item.src}
                   alt={item.alt}
                   fill
                   sizes="(min-width: 640px) 50vw, 100vw"
@@ -72,9 +59,11 @@ export function RecentWork() {
                     <p className="font-display text-[19px] font-semibold tracking-[-0.025em] text-bone">
                       {item.title}
                     </p>
-                    <p className="mt-1.5 text-[11.5px] leading-relaxed text-bone/45">
-                      {item.caption}
-                    </p>
+                    {item.caption ? (
+                      <p className="mt-1.5 text-[11.5px] leading-relaxed text-bone/45">
+                        {item.caption}
+                      </p>
+                    ) : null}
                   </div>
                   <Icon
                     name="boxes"

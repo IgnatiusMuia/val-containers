@@ -28,9 +28,12 @@ const mediaSchema = z.object({
   alt: z.string().min(1),
   poster: z.string().nullable().optional(),
   position: z.number().int().default(0),
+  is_cover: z.boolean().default(false),
 });
 
 const containerRowSchema = z.object({
+  id: z.string().uuid(),
+  reference: z.string().min(1),
   slug: z.string().min(1),
   name: z.string().min(1),
   short_name: z.string().min(1),
@@ -40,6 +43,12 @@ const containerRowSchema = z.object({
   condition_label: z.string().nullable().optional(),
   grade: z.string().nullable().optional(),
   price: z.number().int().nonnegative(),
+  currency: z.string().default("KES"),
+  location: z.string().default("Nairobi yard"),
+  delivery_info: z.string().default(""),
+  refrigeration_status: z.string().default("not_applicable"),
+  verified_at: z.string().nullable().optional(),
+  publication_status: z.enum(["draft", "published", "archived"]).default("published"),
   description: z.string().default(""),
   highlights: z.array(z.string()).default([]),
   specs: specsSchema,
@@ -51,7 +60,9 @@ const containerRowSchema = z.object({
   featured: z.boolean().default(false),
   stock: z.number().int().nonnegative().default(0),
   year: z.number().int().nullable().optional(),
-  status: z.enum(["available", "reserved", "sold"]).default("available"),
+  status: z
+    .enum(["available", "reserved", "sold", "unavailable", "inspection"])
+    .default("available"),
   published_at: z.string().nullable().optional(),
   updated_at: z.string(),
   container_media: z.array(mediaSchema).default([]),
@@ -65,7 +76,10 @@ export function mapContainerRow(row: unknown): Container | null {
 
   const data = parsed.data;
   const media: ContainerMedia[] = [...data.container_media]
-    .sort((a, b) => a.position - b.position)
+    .sort(
+      (a, b) =>
+        Number(b.is_cover) - Number(a.is_cover) || a.position - b.position,
+    )
     .map((item) =>
       item.kind === "video"
         ? {
@@ -93,6 +107,8 @@ export function mapContainerRow(row: unknown): Container | null {
   const parsedYear = new Date(addedAt).getFullYear();
 
   return {
+    id: data.id,
+    reference: data.reference,
     slug: data.slug,
     name: data.name,
     shortName: data.short_name,
@@ -105,6 +121,12 @@ export function mapContainerRow(row: unknown): Container | null {
       data.condition_label ?? conditionLabels[data.condition],
     grade: data.grade || "—",
     price: data.price,
+    currency: data.currency,
+    location: data.location,
+    deliveryInfo: data.delivery_info,
+    refrigerationStatus: data.refrigeration_status,
+    verifiedAt: data.verified_at ?? null,
+    publicationStatus: data.publication_status,
     media,
     photosAreRepresentative: data.photos_are_representative,
     description: data.description,

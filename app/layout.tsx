@@ -7,12 +7,13 @@ import {
 import "./globals.css";
 
 import { site } from "@/data/site";
+import { getActiveAnnouncement, getSiteSettings } from "@/lib/content";
+import { getContainerStats } from "@/lib/containers/repository";
+import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
 import { Footer } from "@/components/layout/Footer";
 import { MobileDock } from "@/components/layout/MobileDock";
 import { Navbar } from "@/components/layout/Navbar";
 import { WhatsAppFAB } from "@/components/layout/WhatsAppFAB";
-import { QuoteModal } from "@/components/forms/QuoteModal";
-import { QuoteProvider } from "@/components/forms/QuoteProvider";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { localBusinessSchema, websiteSchema } from "@/lib/schema";
 
@@ -34,56 +35,59 @@ const mono = JetBrains_Mono({
   display: "swap",
 });
 
-const defaultTitle = "Val Containers — Shipping Containers for Sale in Kenya";
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  const defaultTitle = `${settings.siteName} — Shipping Containers for Sale in Kenya`;
 
-export const metadata: Metadata = {
-  metadataBase: new URL(site.url),
-  title: {
-    default: defaultTitle,
-    template: "%s — Val Containers",
-  },
-  description: site.description,
-  applicationName: site.name,
-  authors: [{ name: site.name, url: site.url }],
-  creator: site.name,
-  publisher: site.name,
-  category: "business",
-  keywords: [
-    "shipping containers for sale in Kenya",
-    "containers for sale Nairobi",
-    "20ft container price Kenya",
-    "40ft container price Kenya",
-    "refrigerated container Kenya",
-    "site office container",
-    "container homes Kenya",
-    "fabricated containers",
-    "used shipping containers Kenya",
-  ],
-  openGraph: {
-    type: "website",
-    locale: "en_KE",
-    url: "/",
-    siteName: site.name,
-    title: defaultTitle,
-    description: site.description,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: defaultTitle,
-    description: site.description,
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+  return {
+    metadataBase: new URL(site.url),
+    title: {
+      default: defaultTitle,
+      template: `%s — ${settings.siteName}`,
+    },
+    description: settings.description,
+    applicationName: settings.siteName,
+    authors: [{ name: settings.siteName, url: site.url }],
+    creator: settings.siteName,
+    publisher: settings.siteName,
+    category: "business",
+    keywords: [
+      "shipping containers for sale in Kenya",
+      "containers for sale Nairobi",
+      "20ft container price Kenya",
+      "40ft container price Kenya",
+      "refrigerated container Kenya",
+      "site office container",
+      "container homes Kenya",
+      "fabricated containers",
+      "used shipping containers Kenya",
+    ],
+    openGraph: {
+      type: "website",
+      locale: "en_KE",
+      url: "/",
+      siteName: settings.siteName,
+      title: defaultTitle,
+      description: settings.description,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: defaultTitle,
+      description: settings.description,
+    },
+    robots: {
       index: true,
       follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-      "max-video-preview": -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
     },
-  },
-};
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -92,7 +96,17 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const [settings, announcement, stats] = await Promise.all([
+    getSiteSettings(),
+    getActiveAnnouncement(),
+    getContainerStats(),
+  ]);
+  const priceRange =
+    stats.total > 0
+      ? `KES ${stats.minPrice.toLocaleString("en-KE")} – ${stats.maxPrice.toLocaleString("en-KE")}`
+      : undefined;
+
   return (
     <html
       lang="en-KE"
@@ -106,19 +120,22 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
 
-        <QuoteProvider>
-          <Navbar />
-          <main id="main" className="flex-1">
-            {children}
-          </main>
-          <Footer />
-          <div className="h-20 md:hidden" aria-hidden="true" />
-          <MobileDock />
-          <WhatsAppFAB />
-          <QuoteModal />
-        </QuoteProvider>
+        {announcement ? <AnnouncementBar announcement={announcement} /> : null}
+        <Navbar settings={settings} />
+        <main id="main" className="flex-1">
+          {children}
+        </main>
+        <Footer settings={settings} />
+        <div className="h-20 md:hidden" aria-hidden="true" />
+        <MobileDock settings={settings} />
+        <WhatsAppFAB whatsappNumber={settings.whatsappNumber} />
 
-        <JsonLd data={[localBusinessSchema(), websiteSchema()]} />
+        <JsonLd
+          data={[
+            localBusinessSchema(settings, priceRange),
+            websiteSchema(settings),
+          ]}
+        />
       </body>
     </html>
   );

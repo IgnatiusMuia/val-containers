@@ -2,6 +2,7 @@ import {
   getContainers,
   getFeaturedContainers,
 } from "@/lib/containers/repository";
+import { contentValue, getSiteContent } from "@/lib/content";
 import { waLink, waMessages } from "@/lib/whatsapp";
 import { ButtonLink } from "@/components/ui/Button";
 import { ContainerCard } from "@/components/containers/ContainerCard";
@@ -17,10 +18,22 @@ const spans = [
 ] as const;
 
 export async function FeaturedFleet() {
-  const [containers, featuredContainers] = await Promise.all([
+  const [containers, featuredContainers, content] = await Promise.all([
     getContainers(),
     getFeaturedContainers(),
+    getSiteContent(),
   ]);
+  const label = contentValue(content, "home.fleet.eyebrow", "The fleet");
+  const heading = contentValue(
+    content,
+    "home.fleet.title",
+    "Stock you can inspect, price and take home.",
+  );
+  const description = contentValue(
+    content,
+    "home.fleet.body",
+    "A working selection from the yard. Every listing has a published price and condition notes. Ask for current photos, the serial and the inspection sheet for the exact unit before you pay.",
+  );
 
   return (
     <section className="relative bg-ink py-20 sm:py-28">
@@ -28,14 +41,9 @@ export async function FeaturedFleet() {
         <Reveal>
           <SectionHeading
             index="01"
-            label="The fleet"
-            title={
-              <>
-                Stock you can inspect,
-                <br className="hidden sm:block" /> price and take home.
-              </>
-            }
-            description="A working selection from the yard. Every listing has a published price and condition notes. Ask for current photos, the serial and the inspection sheet for the exact unit before you pay."
+            label={label}
+            title={heading}
+            description={description}
             action={
               <ButtonLink href="/containers" variant="outline" size="md">
                 View all {containers.length} containers

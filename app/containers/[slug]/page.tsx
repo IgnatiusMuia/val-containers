@@ -7,6 +7,7 @@ import {
   getContainerSlugs,
   getRelatedContainers,
 } from "@/lib/containers/repository";
+import { getSiteSettings } from "@/lib/content";
 import { site } from "@/data/site";
 import { formatDate, formatKES } from "@/lib/format";
 import { containerEnquiry } from "@/lib/whatsapp";
@@ -71,7 +72,10 @@ export default async function ContainerPage({
   const usesPlaceholder = container.media.every(
     (item) => item.kind === "image" && item.src.includes("photo-coming-soon"),
   );
-  const related = await getRelatedContainers(container, 6);
+  const [related, settings] = await Promise.all([
+    getRelatedContainers(container, 6),
+    getSiteSettings(),
+  ]);
   const message = containerEnquiry({
     name: container.name,
     sizeLabel: container.sizeLabel,
@@ -145,7 +149,7 @@ export default async function ContainerPage({
             </div>
 
             <div className="lg:col-span-5">
-              <EnquiryPanel container={container} />
+              <EnquiryPanel container={container} settings={settings} />
             </div>
           </div>
         </div>
@@ -336,18 +340,18 @@ export default async function ContainerPage({
               <div className="mt-4 border border-ink/12 bg-bone p-5">
                 <p className="flex items-center gap-2 text-[11px] text-ink/55">
                   <Icon name="pin" className="h-3.5 w-3.5 text-ember-deep" />
-                  Inspect at {site.addressLine}
+                  Inspect at {settings.addressLine}
                 </p>
                 <a
-                  href={site.phoneHref}
+                  href={settings.phoneHref}
                   className="mt-3 flex items-center gap-2 text-[11px] text-ink/55 transition-colors hover:text-ink"
                 >
                   <Icon name="phone" className="h-3.5 w-3.5 text-ember-deep" />
-                  {site.phoneDisplay}
+                  {settings.phoneDisplay}
                 </a>
                 <p className="mt-3 border-t border-ink/10 pt-3 text-[10.5px] leading-relaxed text-ink/40">
-                  Open 24/7. Come with your driver or mechanic — we would rather
-                  you check the unit properly.
+                  {settings.hours}. Come with your driver or mechanic — we would
+                  rather you check the unit properly.
                 </p>
               </div>
             </div>

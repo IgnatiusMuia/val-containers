@@ -1,6 +1,5 @@
-import { getContainers } from "@/lib/containers/repository";
-import { deliveryRegions } from "@/data/delivery";
-import { site } from "@/data/site";
+import { getContainerStats } from "@/lib/containers/repository";
+import { contentValue, getSiteContent, getSiteSettings } from "@/lib/content";
 import { heroMedia } from "@/data/media";
 import { formatKES } from "@/lib/format";
 import { waLink, waMessages } from "@/lib/whatsapp";
@@ -10,16 +9,41 @@ import { QuoteButton } from "@/components/forms/QuoteButton";
 import { HeroBackdrop } from "@/components/home/HeroBackdrop";
 
 export async function HomeHero() {
-  const containers = await getContainers();
-  const listingCount = containers.length;
-  const minPrice = listingCount
-    ? Math.min(...containers.map((container) => container.price))
-    : 0;
-  const latestUpdate = containers.reduce(
-    (latest, container) =>
-      container.addedAt > latest ? container.addedAt : latest,
-    containers[0]?.addedAt ?? "",
+  const [stats, settings, content] = await Promise.all([
+    getContainerStats(),
+    getSiteSettings(),
+    getSiteContent(),
+  ]);
+  const listingCount = stats.total;
+  const minPrice = stats.minPrice;
+  const hasPrice = minPrice > 0;
+  const eyebrow = contentValue(
+    content,
+    "home.hero.eyebrow",
+    "Nairobi yard · Countrywide delivery",
   );
+  const headline = contentValue(
+    content,
+    "home.hero.title",
+    "Every container has",
+  );
+  const accent = contentValue(content, "home.hero.accent", "a paper trail.");
+  const body = contentValue(
+    content,
+    "home.hero.body",
+    "Plain, fabricated and refrigerated containers with published prices, condition notes and the documents available for the exact unit. Inspect before you pay, or ask for current photos and video.",
+  );
+  const primaryCta = contentValue(
+    content,
+    "home.hero.primary_cta",
+    "Browse the fleet",
+  );
+  const secondaryCta = contentValue(
+    content,
+    "home.hero.secondary_cta",
+    "Get a free quote",
+  );
+  const latestUpdate = stats.latestUpdate;
   const latestLabel = latestUpdate
     ? new Intl.DateTimeFormat("en-KE", {
         month: "long",
@@ -29,8 +53,8 @@ export async function HomeHero() {
 
   const ledger = [
     ["Listings online", String(listingCount)],
-    ["Delivery regions", String(deliveryRegions.length)],
-    ["Yard access", "24/7"],
+    ["Available now", String(stats.available)],
+    ["Units in stock", String(stats.units)],
   ] as const;
   return (
     <section className="grain relative isolate flex min-h-[88svh] items-end overflow-hidden bg-ink">
@@ -53,35 +77,31 @@ export async function HomeHero() {
           <div className="lg:col-span-8">
             <div className="flex items-center gap-3">
               <span className="h-px w-10 bg-ember" aria-hidden="true" />
-              <p className="eyebrow text-bone/65">
-                Nairobi yard · Countrywide delivery
-              </p>
+              <p className="eyebrow text-bone/65">{eyebrow}</p>
             </div>
 
             <h1 className="mt-6 font-display text-[clamp(3.1rem,7.4vw,6.6rem)] font-bold leading-[0.9] tracking-[-0.055em] text-bone">
-              Every container has
+              {headline}
               <br />
-              <span className="text-ember">a paper trail.</span>
+              <span className="text-ember">{accent}</span>
             </h1>
 
             <p className="mt-7 max-w-xl text-[15px] leading-relaxed text-bone/70 sm:text-base">
-              Plain, fabricated and refrigerated containers with published
-              prices, condition notes and the documents available for the exact
-              unit. Inspect before you pay, or ask for current photos and video.
+              {body}
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
               <ButtonLink href="/containers" size="lg">
-                Browse the fleet
+                {primaryCta}
               </ButtonLink>
               <QuoteButton variant="outline" size="lg" source="hero">
-                Get a free quote
+                {secondaryCta}
               </QuoteButton>
             </div>
 
             <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] text-bone/55">
               <a
-                href={waLink(waMessages.general)}
+                href={waLink(waMessages.general, settings.whatsappNumber)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 transition-colors hover:text-bone"
@@ -91,18 +111,18 @@ export async function HomeHero() {
               </a>
               <span className="h-3 w-px bg-bone/20" aria-hidden="true" />
               <a
-                href={site.phoneHref}
+                href={settings.phoneHref}
                 className="inline-flex items-center gap-2 transition-colors hover:text-bone"
               >
                 <Icon name="phone" className="h-4 w-4 text-bone/50" />
-                {site.phoneDisplay}
+                {settings.phoneDisplay}
               </a>
             </div>
 
             <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-bone/15 pt-5 font-mono text-[9px] uppercase tracking-[0.14em] text-bone/45 lg:hidden">
               <span>{listingCount} listings</span>
-              <span>From {formatKES(minPrice)}</span>
-              <span>Open 24/7</span>
+              <span>{hasPrice ? `From ${formatKES(minPrice)}` : "Price on request"}</span>
+              <span>{stats.available} available now</span>
             </div>
           </div>
 
@@ -141,15 +161,17 @@ export async function HomeHero() {
                   Stock starts at
                 </span>
                 <p className="mt-1 font-display text-3xl font-semibold tracking-[-0.03em] text-bone">
-                  {formatKES(minPrice)}
+                  {hasPrice ? formatKES(minPrice) : "On request"}
                 </p>
                 <p className="mt-1 text-[11px] text-bone/40">
-                  Published, not &ldquo;call for price&rdquo;.
+                  {hasPrice
+                    ? "Published, not \u201ccall for price\u201d."
+                    : "Ask the yard for current pricing."}
                 </p>
               </div>
 
               <a
-                href={waLink(waMessages.general)}
+                href={waLink(waMessages.general, settings.whatsappNumber)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-5 flex h-11 items-center justify-center gap-2 bg-whatsapp px-4 text-[12.5px] font-medium text-white transition-opacity hover:opacity-90"
@@ -158,11 +180,11 @@ export async function HomeHero() {
                 WhatsApp the yard
               </a>
               <a
-                href={site.phoneHref}
+                href={settings.phoneHref}
                 className="mt-2 flex h-10 items-center justify-center gap-2 border border-bone/15 text-[12px] text-bone/65 transition-colors hover:border-bone/40 hover:text-bone"
               >
                 <Icon name="phone" className="h-3.5 w-3.5" />
-                {site.phoneDisplay}
+                {settings.phoneDisplay}
               </a>
             </div>
           </div>

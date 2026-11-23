@@ -1,79 +1,28 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import Link from "next/link";
+import { useActionState } from "react";
 import { buttonStyles } from "@/components/ui/Button";
+import {
+  loginAction,
+  magicLinkAction,
+  type AuthActionState,
+} from "@/lib/actions/auth";
 
 const inputClass =
   "h-12 w-full border border-bone/15 bg-coal px-3 text-sm text-bone placeholder:text-bone/25 focus:border-ember focus:outline-none";
 
+const initialState: AuthActionState = {};
+
 export function LoginForm({ configured }: { configured: boolean }) {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState<"password" | "magic" | null>(null);
-
-  async function signInWithPassword(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError(null);
-    setMessage(null);
-
-    const supabase = createSupabaseBrowserClient();
-    if (!supabase) {
-      setError("Supabase is not configured yet.");
-      return;
-    }
-
-    setPending("password");
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    setPending(null);
-
-    if (authError) {
-      setError(authError.message);
-      return;
-    }
-
-    router.push("/admin");
-    router.refresh();
-  }
-
-  async function sendMagicLink() {
-    setError(null);
-    setMessage(null);
-
-    const supabase = createSupabaseBrowserClient();
-    if (!supabase) {
-      setError("Supabase is not configured yet.");
-      return;
-    }
-
-    if (!email) {
-      setError("Enter your email address first.");
-      return;
-    }
-
-    setPending("magic");
-    const { error: authError } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/admin`,
-      },
-    });
-    setPending(null);
-
-    if (authError) {
-      setError(authError.message);
-      return;
-    }
-
-    setMessage("Check your inbox for the sign-in link.");
-  }
+  const [loginState, login, loginPending] = useActionState(
+    loginAction,
+    initialState,
+  );
+  const [magicState, magic, magicPending] = useActionState(
+    magicLinkAction,
+    initialState,
+  );
 
   if (!configured) {
     return (
@@ -90,10 +39,17 @@ export function LoginForm({ configured }: { configured: boolean }) {
           <code className="font-mono text-bone/80">
             NEXT_PUBLIC_SUPABASE_ANON_KEY
           </code>{" "}
-          and{" "}
+          (or{" "}
+          <code className="font-mono text-bone/80">
+            NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+          </code>
+          ) and{" "}
           <code className="font-mono text-bone/80">
             SUPABASE_SERVICE_ROLE_KEY
           </code>{" "}
+          (or{" "}
+          <code className="font-mono text-bone/80">SUPABASE_SECRET_KEY</code>)
+          {" "}
           to the environment, then run the migration in{" "}
           <code className="font-mono text-bone/80">supabase/migrations</code>.
         </p>
@@ -103,7 +59,7 @@ export function LoginForm({ configured }: { configured: boolean }) {
 
   return (
     <div className="space-y-5">
-      <form onSubmit={signInWithPassword} className="space-y-4">
+      <form action={login} className="space-y-4">
         <div>
           <label
             htmlFor="admin-email"
@@ -113,50 +69,54 @@ export function LoginForm({ configured }: { configured: boolean }) {
           </label>
           <input
             id="admin-email"
+            name="email"
             type="email"
             autoComplete="email"
             required
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
             className={inputClass}
           />
         </div>
 
         <div>
-          <label
-            htmlFor="admin-password"
-            className="mb-2 block font-mono text-[10px] uppercase tracking-[0.18em] text-bone/45"
-          >
-            Password
-          </label>
+          <div className="mb-2 flex items-baseline justify-between gap-3">
+            <label
+              htmlFor="admin-password"
+              className="font-mono text-[10px] uppercase tracking-[0.18em] text-bone/45"
+            >
+              Password
+            </label>
+            <Link
+              href="/admin/forgot-password"
+              className="text-[11px] text-bone/40 transition-colors hover:text-bone"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <input
             id="admin-password"
+            name="password"
             type="password"
             autoComplete="current-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
+            required
             className={inputClass}
           />
         </div>
 
-        {error ? (
-          <p className="border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
-            {error}
-          </p>
-        ) : null}
-
-        {message ? (
-          <p className="border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
-            {message}
+        {loginState.error ? (
+          <p
+            role="alert"
+            className="border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200"
+          >
+            {loginState.error}
           </p>
         ) : null}
 
         <button
           type="submit"
-          disabled={pending !== null}
+          disabled={loginPending}
           className={buttonStyles({ className: "w-full" })}
         >
-          {pending === "password" ? "Signing in…" : "Sign in"}
+          {loginPending ? "Signing in…" : "Sign in"}
         </button>
       </form>
 
@@ -168,17 +128,46 @@ export function LoginForm({ configured }: { configured: boolean }) {
         <span className="h-px flex-1 bg-bone/10" />
       </div>
 
-      <button
-        type="button"
-        onClick={sendMagicLink}
-        disabled={pending !== null}
-        className={buttonStyles({
-          variant: "outline",
-          className: "w-full",
-        })}
-      >
-        {pending === "magic" ? "Sending…" : "Email me a sign-in link"}
-      </button>
+      <form action={magic} className="space-y-3">
+        <label
+          htmlFor="magic-email"
+          className="block font-mono text-[10px] uppercase tracking-[0.18em] text-bone/45"
+        >
+          Email sign-in link
+        </label>
+        <input
+          id="magic-email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+          placeholder="Use the same admin email"
+          className={inputClass}
+        />
+        {magicState.error ? (
+          <p
+            role="alert"
+            className="border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200"
+          >
+            {magicState.error}
+          </p>
+        ) : null}
+        {magicState.message ? (
+          <p className="border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
+            {magicState.message}
+          </p>
+        ) : null}
+        <button
+          type="submit"
+          disabled={magicPending}
+          className={buttonStyles({
+            variant: "outline",
+            className: "w-full",
+          })}
+        >
+          {magicPending ? "Sending…" : "Email me a sign-in link"}
+        </button>
+      </form>
     </div>
   );
 }

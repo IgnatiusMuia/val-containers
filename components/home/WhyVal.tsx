@@ -1,5 +1,5 @@
-import { stats } from "@/data/site";
-import { getContainers } from "@/lib/containers/repository";
+import { getContainerStats } from "@/lib/containers/repository";
+import { contentValue, getSiteContent, getSiteSettings } from "@/lib/content";
 import { waLink, waMessages } from "@/lib/whatsapp";
 import { Counter } from "@/components/ui/Counter";
 import { Icon } from "@/components/ui/Icons";
@@ -40,12 +40,33 @@ const comparison = [
 ] as const;
 
 export async function WhyVal() {
-  const containers = await getContainers();
-  const yardStats = stats.map((stat) =>
-    stat.label === "Listings online"
-      ? { ...stat, value: containers.length }
-      : stat,
+  const [stats, settings, content] = await Promise.all([
+    getContainerStats(),
+    getSiteSettings(),
+    getSiteContent(),
+  ]);
+  const label = contentValue(content, "home.why.eyebrow", "Why Val");
+  const heading = contentValue(
+    content,
+    "home.why.title",
+    "The details other yards skip.",
   );
+  const description = contentValue(
+    content,
+    "home.why.body",
+    "A container is a simple product. The difference is what comes with it: current photos, clear condition notes and a delivery plan that survives the gate.",
+  );
+  const rule = contentValue(
+    content,
+    "home.why.quote",
+    "If a unit is not right for the job, we will say so before you pay.",
+  );
+  const yardStats = [
+    { value: stats.total, suffix: "", label: "Listings online" },
+    { value: stats.units, suffix: "", label: "Units in stock" },
+    { value: stats.available, suffix: "", label: "Available now" },
+    { value: stats.refrigerated, suffix: "", label: "Refrigerated" },
+  ];
 
   return (
     <section className="relative overflow-hidden border-y border-bone/10 bg-steel py-20 sm:py-28">
@@ -54,14 +75,9 @@ export async function WhyVal() {
         <Reveal>
           <SectionHeading
             index="03"
-            label="Why Val"
-            title={
-              <>
-                The details other
-                <br className="hidden sm:block" /> yards skip.
-              </>
-            }
-            description="A container is a simple product. The difference is what comes with it: current photos, clear condition notes and a delivery plan that survives the gate."
+            label={label}
+            title={heading}
+            description={description}
           />
         </Reveal>
 
@@ -82,8 +98,7 @@ export async function WhyVal() {
 
             <div className="mt-6 border-l-2 border-ember bg-ink/40 px-5 py-5">
               <p className="font-display text-[17px] font-medium leading-relaxed tracking-[-0.015em] text-bone/85">
-                &ldquo;If a unit is not right for the job, we will say so before
-                you pay.&rdquo;
+                &ldquo;{rule}&rdquo;
               </p>
               <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.16em] text-bone/35">
                 The yard rule
@@ -92,7 +107,7 @@ export async function WhyVal() {
 
             <div className="mt-6 flex flex-wrap items-center gap-4">
               <a
-                href={waLink(waMessages.viewing)}
+                href={waLink(waMessages.viewing, settings.whatsappNumber)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group inline-flex items-center gap-2 text-[13px] font-medium text-bone transition-colors hover:text-ember"
@@ -105,7 +120,7 @@ export async function WhyVal() {
               </a>
               <span className="h-3 w-px bg-bone/20" aria-hidden="true" />
               <span className="text-[12px] text-bone/40">
-                Open 24 hours · Likoni Road
+                {settings.hours} · Likoni Road
               </span>
             </div>
           </div>

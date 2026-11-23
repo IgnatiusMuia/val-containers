@@ -1,10 +1,18 @@
 import type { Container } from "@/data/containers";
+import type { SiteSettings } from "@/lib/site-settings";
 import { formatKES } from "@/lib/format";
+import { availabilityLabel } from "@/lib/containers/availability";
 import { containerEnquiry, waLink } from "@/lib/whatsapp";
 import { Icon } from "@/components/ui/Icons";
 import { QuoteButton } from "@/components/forms/QuoteButton";
 
-export function EnquiryPanel({ container }: { container: Container }) {
+export function EnquiryPanel({
+  container,
+  settings,
+}: {
+  container: Container;
+  settings: SiteSettings;
+}) {
   const message = containerEnquiry({
     name: container.name,
     sizeLabel: container.sizeLabel,
@@ -57,7 +65,7 @@ export function EnquiryPanel({ container }: { container: Container }) {
         </div>
         <span className="flex items-center gap-1.5 pb-1 font-mono text-[9px] uppercase tracking-[0.1em] text-bone/40">
           <span className="h-1.5 w-1.5 rounded-full bg-bone/30" />
-          Availability on request
+          {availabilityLabel(container)}
         </span>
       </div>
 
@@ -80,7 +88,7 @@ export function EnquiryPanel({ container }: { container: Container }) {
           Request a delivered quote
         </QuoteButton>
         <a
-          href="tel:+254795506397"
+          href={settings.phoneHref}
           className="flex h-10 items-center justify-center gap-2 text-[12px] text-bone/50 transition-colors hover:text-bone"
         >
           <Icon name="phone" className="h-3.5 w-3.5" />
@@ -125,7 +133,7 @@ export function EnquiryPanel({ container }: { container: Container }) {
       <div className="mt-4 space-y-1.5">
         <p className="flex items-center gap-2 text-[11px] text-bone/40">
           <Icon name="clock" className="h-3.5 w-3.5 text-bone/30" />
-          Yard open 24/7 · Inspect before you pay
+          {settings.hours} · Inspect before you pay
         </p>
         <p className="flex items-center gap-2 text-[11px] text-bone/40">
           <Icon name="truck" className="h-3.5 w-3.5 text-bone/30" />

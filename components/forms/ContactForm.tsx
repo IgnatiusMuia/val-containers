@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { contactMessage, waLink } from "@/lib/whatsapp";
-import { saveLeadAction } from "@/lib/actions/leads";
+import Link from "next/link";
+import { useActionState } from "react";
+import {
+  submitEnquiryAction,
+  type EnquiryActionState,
+} from "@/lib/actions/enquiries";
 import { Icon } from "@/components/ui/Icons";
 
 const interests = [
@@ -17,87 +20,68 @@ const interests = [
 const fieldClass =
   "h-11 w-full border border-ink/20 bg-bone px-3 text-[13px] text-ink placeholder:text-ink/30 focus:border-ember-deep focus:outline-none";
 
+const initialState: EnquiryActionState = {};
+
 export function ContactForm() {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [interest, setInterest] = useState(interests[0]);
-  const [message, setMessage] = useState("");
-  const [sent, setSent] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [state, action, pending] = useActionState(
+    submitEnquiryAction,
+    initialState,
+  );
 
-  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const url = waLink(
-      contactMessage({ name, phone, email, interest, message }),
-    );
-    const popup = window.open("about:blank", "_blank");
-    if (popup) popup.opener = null;
-
-    setSaving(true);
-    try {
-      await saveLeadAction({
-        name,
-        phone,
-        email,
-        message,
-        interest,
-        source: "contact-page",
-        pagePath: window.location.pathname,
-        website: String(new FormData(event.currentTarget).get("website") ?? ""),
-      });
-    } catch {
-      // WhatsApp still opens if the database is unavailable.
-    }
-    setSaving(false);
-
-    if (popup) {
-      popup.location.href = url;
-    } else {
-      window.open(url, "_blank", "noopener,noreferrer");
-    }
-
-    setSent(true);
-  };
-
-  if (sent) {
+  if (state.ok && state.reference) {
     return (
       <div className="border border-ink/15 bg-bone-2/40 p-6 sm:p-8">
         <div className="grid h-11 w-11 place-items-center bg-ember text-ink">
           <Icon name="check" className="h-5 w-5" />
         </div>
         <h3 className="mt-5 font-display text-[26px] font-semibold tracking-[-0.03em] text-ink">
-          WhatsApp is open.
+          Message saved.
         </h3>
         <p className="mt-2 text-[13px] leading-relaxed text-ink/60">
-          If the message did not open, use the link below. We reply during yard
-          hours and usually within a few minutes.
+          Your reference is{" "}
+          <span className="font-mono text-ink">{state.reference}</span>. Continue
+          on WhatsApp so the yard sees it immediately.
         </p>
-        <a
-          href={waLink(
-            contactMessage({ name, phone, email, interest, message }),
-          )}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-5 flex h-12 items-center justify-center gap-2 bg-whatsapp text-[13px] font-medium text-white"
+        {state.whatsappUrl ? (
+          <a
+            href={state.whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-5 flex h-12 items-center justify-center gap-2 bg-whatsapp text-[13px] font-medium text-white"
+          >
+            <Icon name="whatsapp" className="h-4 w-4" />
+            Continue on WhatsApp
+          </a>
+        ) : null}
+        <Link
+          href="/enquire"
+          className="mt-4 inline-flex text-[11px] text-ink/45 underline decoration-ink/20 underline-offset-4 hover:text-ink"
         >
-          <Icon name="whatsapp" className="h-4 w-4" />
-          Open WhatsApp again
-        </a>
-        <button
-          type="button"
-          onClick={() => setSent(false)}
-          className="mt-4 text-[11px] text-ink/45 underline decoration-ink/20 underline-offset-4 hover:text-ink"
-        >
-          Send another message
-        </button>
+          Open the full enquiry form
+        </Link>
       </div>
     );
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form action={action} className="space-y-4">
+      <input type="hidden" name="source" value="contact-page" />
+      <input type="hidden" name="pagePath" value="/contact" />
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="hidden"
+      />
+
+      {state.error ? (
+        <p className="border border-red-700/25 bg-red-700/5 px-3 py-2 text-sm text-red-800">
+          {state.error}
+        </p>
+      ) : null}
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label
@@ -110,8 +94,7 @@ export function ContactForm() {
             id="contact-name"
             name="name"
             required
-            value={name}
-            onChange={(event) => setName(event.target.value)}
+            autoComplete="name"
             placeholder="Your name"
             className={fieldClass}
           />
@@ -128,8 +111,7 @@ export function ContactForm() {
             name="phone"
             type="tel"
             required
-            value={phone}
-            onChange={(event) => setPhone(event.target.value)}
+            autoComplete="tel"
             placeholder="+254…"
             className={fieldClass}
           />
@@ -148,8 +130,7 @@ export function ContactForm() {
             id="contact-email"
             name="email"
             type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            autoComplete="email"
             placeholder="you@company.co.ke"
             className={fieldClass}
           />
@@ -163,9 +144,8 @@ export function ContactForm() {
           </label>
           <select
             id="contact-interest"
-            name="interest"
-            value={interest}
-            onChange={(event) => setInterest(event.target.value)}
+            name="useCase"
+            defaultValue={interests[0]}
             className={fieldClass}
           >
             {interests.map((option) => (
@@ -176,15 +156,6 @@ export function ContactForm() {
           </select>
         </div>
       </div>
-
-      <input
-        type="text"
-        name="website"
-        tabIndex={-1}
-        autoComplete="off"
-        aria-hidden="true"
-        className="hidden"
-      />
 
       <div>
         <label
@@ -198,8 +169,6 @@ export function ContactForm() {
           name="message"
           required
           rows={5}
-          value={message}
-          onChange={(event) => setMessage(event.target.value)}
           placeholder="Size, use, delivery town, timeline — or just ask a question."
           className="w-full resize-y border border-ink/20 bg-bone px-3 py-2.5 text-[13px] leading-relaxed text-ink placeholder:text-ink/30 focus:border-ember-deep focus:outline-none"
         />
@@ -207,15 +176,15 @@ export function ContactForm() {
 
       <button
         type="submit"
-        disabled={saving}
+        disabled={pending}
         className="flex h-12 w-full items-center justify-center gap-2 bg-whatsapp text-[13px] font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
       >
         <Icon name="whatsapp" className="h-4 w-4" />
-        {saving ? "Saving…" : "Send on WhatsApp"}
+        {pending ? "Saving…" : "Save message & open WhatsApp"}
       </button>
       <p className="text-center text-[10px] leading-relaxed text-ink/35">
-        This opens WhatsApp with your message ready to send. No account or form
-        database is involved.
+        The message is saved with a reference before WhatsApp opens. No payment
+        is taken on this site.
       </p>
     </form>
   );

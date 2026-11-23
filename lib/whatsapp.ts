@@ -1,7 +1,7 @@
 import { site } from "@/data/site";
 
-export function waLink(message: string) {
-  return `https://wa.me/${site.whatsappNumber}?text=${encodeURIComponent(message)}`;
+export function waLink(message: string, phone: string = site.whatsappNumber) {
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
 
 export const waMessages = {

@@ -2,6 +2,10 @@ export function formatKES(value: number) {
   return `KES ${value.toLocaleString("en-KE")}`;
 }
 
+export function formatMoney(value: number, currency = "KES") {
+  return `${currency} ${value.toLocaleString("en-KE")}`;
+}
+
 export function formatCompactKES(value: number) {
   if (value >= 1_000_000) {
     const millions = value / 1_000_000;

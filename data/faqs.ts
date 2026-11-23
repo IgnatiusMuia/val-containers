@@ -32,7 +32,7 @@ export const faqs: Faq[] = [
   {
     question: "Can I inspect the container before paying?",
     answer:
-      "Yes. The yard is open 24 hours and you can inspect any unit in person. If you are upcountry, we can send current photos and a video walkaround of the exact container where available, including the serial and any CSC plate. Confirm what is available before paying. We do not swap units after payment.",
+      "Yes. Call ahead to confirm yard access and a viewing time, then inspect the exact unit in person. If you are upcountry, we can send current photos and a video walkaround of the exact container where available, including the serial and any CSC plate. Confirm what is available before paying. We do not swap units after payment.",
   },
   {
     question: "Do you deliver outside Kenya?",

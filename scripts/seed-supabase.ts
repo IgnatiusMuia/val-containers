@@ -30,11 +30,12 @@ loadEnvFile(".env.local");
 loadEnvFile(".env");
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const serviceRoleKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY;
 
 if (!url || !serviceRoleKey) {
   console.error(
-    "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY. Add them to .env.local first.",
+    "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY/SUPABASE_SECRET_KEY. Add them to .env.local first.",
   );
   process.exit(1);
 }
@@ -64,6 +65,7 @@ async function main() {
     photos_are_representative: container.photosAreRepresentative ?? false,
     featured: container.featured,
     status: "available",
+    publication_status: "published",
     stock: container.stock,
     year: container.year,
     published_at: new Date(container.addedAt).toISOString(),
@@ -127,6 +129,9 @@ async function main() {
       continue;
     }
 
+    const coverIndex = container.media.findIndex(
+      (item) => item.kind === "image",
+    );
     const media = container.media.map((item, index) => ({
       container_id: containerId,
       kind: item.kind,
@@ -134,6 +139,7 @@ async function main() {
       alt: item.alt,
       poster: item.kind === "video" ? item.poster : null,
       position: index,
+      is_cover: index === coverIndex,
     }));
 
     if (media.length === 0) continue;

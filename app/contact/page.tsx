@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { site } from "@/data/site";
+import { contentValue, getSiteContent, getSiteSettings } from "@/lib/content";
 import { breadcrumbSchema, localBusinessSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
@@ -7,9 +8,9 @@ import { Icon } from "@/components/ui/Icons";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { QuoteButton } from "@/components/forms/QuoteButton";
 
-const title = "Contact Val Containers — Nairobi Yard, Open 24/7";
+const title = "Contact Val Containers — Nairobi Container Yard";
 const description =
-  "Talk to the Val Containers yard in Nairobi. Call or WhatsApp +254 795 506 397, get a quote, or visit near the NTSA Inspection Centre on Likoni Road. Open 24 hours.";
+  "Talk to the Val Containers yard in Nairobi. Call or WhatsApp +254 795 506 397, get a quote, or visit near the NTSA Inspection Centre on Likoni Road.";
 
 export const metadata: Metadata = {
   title,
@@ -37,7 +38,22 @@ const visitChecks = [
   "A deposit only after you have seen the exact unit",
 ];
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const [settings, content] = await Promise.all([
+    getSiteSettings(),
+    getSiteContent(),
+  ]);
+  const heroBody = contentValue(
+    content,
+    "contact.hero.body",
+    "Call, WhatsApp or send the form below. A real person at the yard will answer — not a call centre. If you are nearby, come and inspect the unit yourself.",
+  );
+  const formIntro = contentValue(
+    content,
+    "contact.form.intro",
+    "The form saves your enquiry and opens WhatsApp with your details filled in. You will receive a reference so the yard can find your request.",
+  );
+
   return (
     <>
       <JsonLd
@@ -46,7 +62,7 @@ export default function ContactPage() {
             { name: "Home", path: "/" },
             { name: "Contact", path: "/contact" },
           ]),
-          localBusinessSchema(),
+          localBusinessSchema(settings),
         ]}
       />
 
@@ -58,28 +74,26 @@ export default function ContactPage() {
           />
           <div className="grid items-end gap-10 lg:grid-cols-12">
             <div className="lg:col-span-8">
-              <p className="eyebrow text-ember">Nairobi yard · Open 24/7</p>
+              <p className="eyebrow text-ember">Nairobi yard</p>
               <h1 className="mt-5 font-display text-[clamp(2.8rem,6.2vw,5.2rem)] font-bold leading-[0.92] tracking-[-0.05em] text-bone">
                 Talk to
                 <br />
                 the yard<span className="text-ember">.</span>
               </h1>
               <p className="mt-7 max-w-xl text-[14px] leading-relaxed text-bone/55 sm:text-[15px]">
-                Call, WhatsApp or send the form below. A real person at the yard
-                will answer — not a call centre. If you are nearby, come and
-                inspect the unit yourself.
+                {heroBody}
               </p>
             </div>
             <div className="lg:col-span-4">
               <div className="grid gap-px border border-bone/12 bg-bone/12">
                 <a
-                  href={site.phoneHref}
+                  href={settings.phoneHref}
                   className="group flex items-center justify-between gap-4 bg-ink px-4 py-3.5 transition-colors hover:bg-coal"
                 >
                   <span className="flex items-center gap-3">
                     <Icon name="phone" className="h-4 w-4 text-ember" />
                     <span className="text-[12px] text-bone/70">
-                      {site.phoneDisplay}
+                      {settings.phoneDisplay}
                     </span>
                   </span>
                   <Icon
@@ -88,12 +102,12 @@ export default function ContactPage() {
                   />
                 </a>
                 <a
-                  href={`mailto:${site.email}`}
+                  href={`mailto:${settings.email}`}
                   className="group flex items-center justify-between gap-4 bg-ink px-4 py-3.5 transition-colors hover:bg-coal"
                 >
                   <span className="flex items-center gap-3">
                     <Icon name="mail" className="h-4 w-4 text-ember" />
-                    <span className="text-[12px] text-bone/70">{site.email}</span>
+                    <span className="text-[12px] text-bone/70">{settings.email}</span>
                   </span>
                   <Icon
                     name="arrow-up-right"
@@ -103,7 +117,7 @@ export default function ContactPage() {
                 <div className="flex items-center gap-3 bg-ink px-4 py-3.5">
                   <Icon name="clock" className="h-4 w-4 text-ember" />
                   <span className="text-[12px] text-bone/70">
-                    Open 24 hours, every day
+                    {settings.hours}
                   </span>
                 </div>
               </div>
@@ -121,8 +135,7 @@ export default function ContactPage() {
                 Tell us what you need.
               </h2>
               <p className="mt-4 max-w-lg text-[13px] leading-relaxed text-ink/55">
-                The form opens WhatsApp with your details already filled in. If
-                you prefer the guided version, use the quote button instead.
+                {formIntro}
               </p>
               <div className="mt-8">
                 <ContactForm />
@@ -148,11 +161,10 @@ export default function ContactPage() {
                 Come and kick the tyres.
               </h2>
               <p className="mt-4 text-[13px] leading-relaxed text-ink/60">
-                {site.addressLine}, {site.address}. Near the NTSA Inspection
-                Centre on Likoni Road.
+                {settings.addressLine}, {settings.address}.
               </p>
               <a
-                href={site.mapsUrl}
+                href={settings.mapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-4 inline-flex items-center gap-2 text-[12px] font-medium text-ember-deep"
@@ -163,7 +175,7 @@ export default function ContactPage() {
 
               <div className="mt-6 overflow-hidden border border-ink/12">
                 <iframe
-                  src={site.mapsEmbed}
+                  src={settings.mapsEmbed}
                   title="Map showing Val Containers yard in Nairobi"
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"

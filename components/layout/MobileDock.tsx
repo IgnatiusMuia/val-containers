@@ -1,11 +1,11 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { site } from "@/data/site";
+import type { SiteSettings } from "@/lib/site-settings";
 import { waLink, waMessages } from "@/lib/whatsapp";
 import { Icon } from "@/components/ui/Icons";
 
-export function MobileDock() {
+export function MobileDock({ settings }: { settings: SiteSettings }) {
   const pathname = usePathname();
 
   if (
@@ -19,7 +19,7 @@ export function MobileDock() {
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-bone/12 bg-ink/95 backdrop-blur-xl md:hidden">
       <div className="grid grid-cols-3 px-2 pb-safe pt-1.5">
         <a
-          href={waLink(waMessages.general)}
+          href={waLink(waMessages.general, settings.whatsappNumber)}
           target="_blank"
           rel="noopener noreferrer"
           className="flex flex-col items-center gap-1 py-2 text-[9px] font-mono uppercase tracking-[0.14em] text-bone/55 transition-colors hover:text-bone"
@@ -28,14 +28,14 @@ export function MobileDock() {
           WhatsApp
         </a>
         <a
-          href={site.phoneHref}
+          href={settings.phoneHref}
           className="flex flex-col items-center gap-1 border-x border-bone/10 py-2 text-[9px] font-mono uppercase tracking-[0.14em] text-bone/55 transition-colors hover:text-bone"
         >
           <Icon name="phone" className="h-5 w-5 text-ember" />
-          Call 24/7
+          Call yard
         </a>
         <a
-          href={site.mapsUrl}
+          href={settings.mapsUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="flex flex-col items-center gap-1 py-2 text-[9px] font-mono uppercase tracking-[0.14em] text-bone/55 transition-colors hover:text-bone"
