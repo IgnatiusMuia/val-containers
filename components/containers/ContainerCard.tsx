@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Container } from "@/data/containers";
+import { primaryImage, type Container } from "@/data/containers";
 import { cn, formatKES } from "@/lib/format";
 import { Icon } from "@/components/ui/Icons";
 import { SmartImage } from "@/components/ui/SmartImage";
@@ -15,7 +15,8 @@ export function ContainerCard({
   wide?: boolean;
   imageSizes?: string;
 }) {
-  const image = container.images[0];
+  const image = primaryImage(container);
+  const hasVideo = container.media.some((item) => item.kind === "video");
 
   return (
     <Link
@@ -33,6 +34,7 @@ export function ContainerCard({
           sizes={imageSizes}
           wrapperClassName={wide ? "aspect-[16/10]" : "aspect-[4/3]"}
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
+          fallbackLabel="Container photo coming soon"
         />
         <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
           <span className="bg-ink/85 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-bone/80 backdrop-blur-sm">
@@ -48,9 +50,20 @@ export function ContainerCard({
           >
             {container.conditionLabel}
           </span>
+          {hasVideo ? (
+            <span className="inline-flex items-center gap-1 bg-ink/85 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-bone/80 backdrop-blur-sm">
+              <Icon name="play" className="h-2.5 w-2.5 text-ember" />
+              Video
+            </span>
+          ) : null}
+          {container.photosAreRepresentative ? (
+            <span className="bg-ink/85 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-bone/60 backdrop-blur-sm">
+              Yard example
+            </span>
+          ) : null}
         </div>
         <span className="absolute bottom-3 right-3 bg-ink/85 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-bone/60 backdrop-blur-sm">
-          {container.stock} in stock
+          Availability on request
         </span>
       </div>
 

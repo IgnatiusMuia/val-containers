@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { primaryImage } from "@/data/containers";
 import {
-  containers,
   getContainer,
-  relatedContainers,
-} from "@/data/containers";
+  getContainerSlugs,
+  getRelatedContainers,
+} from "@/lib/containers/repository";
 import { site } from "@/data/site";
-import { formatKES } from "@/lib/format";
+import { formatDate, formatKES } from "@/lib/format";
 import { containerEnquiry } from "@/lib/whatsapp";
 import { breadcrumbSchema, productSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -16,26 +17,27 @@ import { Icon } from "@/components/ui/Icons";
 import { ButtonLink } from "@/components/ui/Button";
 import { ContainerCard } from "@/components/containers/ContainerCard";
 import { EnquiryPanel } from "@/components/containers/EnquiryPanel";
-import { Gallery } from "@/components/containers/Gallery";
+import { MediaGallery } from "@/components/containers/MediaGallery";
 import { SpecTable } from "@/components/containers/SpecTable";
 import { StickyEnquiryBar } from "@/components/containers/StickyEnquiryBar";
 
 export const instant = false;
 
-export function generateStaticParams() {
-  return containers.map((container) => ({ slug: container.slug }));
+export async function generateStaticParams() {
+  const slugs = await getContainerSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
   params,
 }: PageProps<"/containers/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const container = getContainer(slug);
+  const container = await getContainer(slug);
   if (!container) return { title: "Container not found" };
 
   const title = `${container.shortName} — ${formatKES(container.price)}`;
   const description = `${container.conditionLabel} ${container.sizeLabel} ${container.typeLabel.toLowerCase()} container for sale in Kenya at ${formatKES(container.price)}. Inspect in Nairobi, delivery countrywide.`;
-  const image = container.images[0];
+  const image = primaryImage(container);
 
   return {
     title,
@@ -63,10 +65,13 @@ export default async function ContainerPage({
   params,
 }: PageProps<"/containers/[slug]">) {
   const { slug } = await params;
-  const container = getContainer(slug);
+  const container = await getContainer(slug);
   if (!container) notFound();
 
-  const related = relatedContainers(container, 6);
+  const usesPlaceholder = container.media.every(
+    (item) => item.kind === "image" && item.src.includes("photo-coming-soon"),
+  );
+  const related = await getRelatedContainers(container, 6);
   const message = containerEnquiry({
     name: container.name,
     sizeLabel: container.sizeLabel,
@@ -103,12 +108,24 @@ export default async function ContainerPage({
 
           <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
             <div className="lg:col-span-7">
-              <Gallery images={container.images} name={container.shortName} />
+              <MediaGallery
+                media={container.media}
+                name={container.shortName}
+                representative={container.photosAreRepresentative}
+              />
+
+              {container.photosAreRepresentative || usesPlaceholder ? (
+                <p className="mt-2 text-[10.5px] leading-relaxed text-bone/35">
+                  Photos and condition notes are examples. Ask for current
+                  photos and the inspection sheet for this exact unit before you
+                  pay.
+                </p>
+              ) : null}
 
               <div className="mt-5 grid grid-cols-3 gap-px border border-bone/10 bg-bone/10">
                 {[
                   { icon: "shield" as const, label: "Inspect before you pay" },
-                  { icon: "file" as const, label: "Written condition report" },
+                  { icon: "file" as const, label: "Condition notes available" },
                   { icon: "truck" as const, label: "Delivery arranged" },
                 ].map((item) => (
                   <div
@@ -199,7 +216,11 @@ export default async function ContainerPage({
                 <div className="h-0.5 w-12 bg-ember" />
                 <div className="mt-5 flex items-center justify-between gap-4">
                   <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-bone/40">
-                    Condition report
+                    {container.photosAreRepresentative
+                      ? "Condition notes · yard example"
+                      : usesPlaceholder
+                        ? "Condition notes · example"
+                        : "Condition notes"}
                   </p>
                   <span className="border border-ember/40 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.1em] text-ember">
                     Grade {container.grade}
@@ -218,8 +239,9 @@ export default async function ContainerPage({
                   ))}
                 </ol>
                 <p className="mt-5 border-t border-bone/10 pt-4 text-[10px] leading-relaxed text-bone/30">
-                  Inspected at our Nairobi yard. We are happy to repeat the
-                  inspection with you or your driver before payment.
+                  Condition notes are based on the last yard check. Ask for the
+                  current inspection sheet and photos of the exact unit before
+                  paying. Availability is confirmed on enquiry.
                 </p>
               </div>
 
@@ -241,6 +263,9 @@ export default async function ContainerPage({
                     </li>
                   ))}
                 </ul>
+                <p className="mt-4 border-t border-ink/10 pt-3 text-[10px] leading-relaxed text-ink/40">
+                  Documents are confirmed against the exact unit before payment.
+                </p>
               </div>
             </div>
           </div>
@@ -253,8 +278,12 @@ export default async function ContainerPage({
             <div className="lg:col-span-7">
               <p className="eyebrow text-ember-deep">Specification</p>
               <h2 className="mt-4 font-display text-[clamp(2rem,4vw,3.2rem)] font-bold leading-[1.02] tracking-[-0.045em] text-ink">
-                Measured, not estimated.
+                Typical specification.
               </h2>
+              <p className="mt-3 max-w-xl text-[12px] leading-relaxed text-ink/45">
+                Standard figures for this container type. Confirm exact
+                dimensions, fit-out and serial details on inspection.
+              </p>
               <div className="mt-8">
                 <SpecTable container={container} />
               </div>
@@ -278,8 +307,8 @@ export default async function ContainerPage({
                 </p>
                 <ul className="mt-5 space-y-2.5 border-t border-bone/10 pt-4">
                   {[
-                    "Nairobi metro — same or next day",
-                    "Countrywide — typically 1–3 working days",
+                    "Nairobi metro — timing confirmed on booking",
+                    "Countrywide — timing confirmed on quote",
                     "Offload arranged if you have no forklift",
                   ].map((item) => (
                     <li
@@ -376,8 +405,8 @@ export default async function ContainerPage({
               ← Back to the full fleet
             </Link>
             <p>
-              {formatKES(container.price)} · Ex-yard Nairobi · Updated November
-              2026
+              {formatKES(container.price)} · Ex-yard Nairobi · Listed{" "}
+              {formatDate(container.addedAt)}
             </p>
           </div>
         </div>

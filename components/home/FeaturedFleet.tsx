@@ -1,4 +1,7 @@
-import { featuredContainers } from "@/data/containers";
+import {
+  getContainers,
+  getFeaturedContainers,
+} from "@/lib/containers/repository";
 import { waLink, waMessages } from "@/lib/whatsapp";
 import { ButtonLink } from "@/components/ui/Button";
 import { ContainerCard } from "@/components/containers/ContainerCard";
@@ -13,7 +16,12 @@ const spans = [
   "lg:col-span-7",
 ] as const;
 
-export function FeaturedFleet() {
+export async function FeaturedFleet() {
+  const [containers, featuredContainers] = await Promise.all([
+    getContainers(),
+    getFeaturedContainers(),
+  ]);
+
   return (
     <section className="relative bg-ink py-20 sm:py-28">
       <div className="wrap">
@@ -27,10 +35,10 @@ export function FeaturedFleet() {
                 <br className="hidden sm:block" /> price and take home.
               </>
             }
-            description="A working selection from the yard. Every unit has a published price, a condition report and a CSC plate we can verify before you pay."
+            description="A working selection from the yard. Every listing has a published price and condition notes. Ask for current photos, the serial and the inspection sheet for the exact unit before you pay."
             action={
               <ButtonLink href="/containers" variant="outline" size="md">
-                View all 12 containers
+                View all {containers.length} containers
               </ButtonLink>
             }
           />
@@ -55,8 +63,8 @@ export function FeaturedFleet() {
 
         <div className="mt-8 flex flex-col justify-between gap-4 border-t border-bone/10 pt-5 sm:flex-row sm:items-center">
           <p className="max-w-xl text-[12px] leading-relaxed text-bone/40">
-            Stock changes. If a unit is sold, we will show you the closest
-            documented alternative rather than quietly swapping it.
+            Availability changes. If a unit is sold, we will show you the
+            closest alternative rather than quietly swapping it.
           </p>
           <a
             href={waLink(waMessages.fabrication)}

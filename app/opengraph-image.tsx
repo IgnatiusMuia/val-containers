@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const alt =
-  "Val Containers — documented shipping containers for sale in Kenya";
+  "Val Containers — shipping containers for sale in Kenya";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -62,8 +62,8 @@ export default async function OpengraphImage() {
               maxWidth: "1000px",
             }}
           >
-            <div>Every container has</div>
-            <div style={{ color: "#f4511e" }}>a paper trail.</div>
+            <div>Every listing has</div>
+            <div style={{ color: "#f4511e" }}>a published price.</div>
           </div>
         </div>
 
@@ -77,8 +77,8 @@ export default async function OpengraphImage() {
             fontSize: "17px",
           }}
         >
-          <span>Published prices · Condition reports · Inspect before you pay</span>
-          <span>valcontainers.co.ke</span>
+          <span>Published prices · Condition notes · Inspect before you pay</span>
+          <span>val-containers.vercel.app</span>
         </div>
       </div>
     ),

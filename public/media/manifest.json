@@ -1,0 +1,193 @@
+{
+  "generatedAt": "2026-11-23T07:59:41.901Z",
+  "sourceDir": "/Users/ignatiusmbitimuia/Desktop/Vallery",
+  "images": [
+    {
+      "source": "photo_2026-11-22 04.25.19.jpeg",
+      "output": "images/hero-poster.jpg",
+      "alt": "Row of black container kiosks in the Nairobi yard",
+      "sha256": "2836fd61da5eec09949fb0ae7dc850b8e7a29cb7db3c8d71570cf5d7a60ca948",
+      "width": 2400,
+      "height": 1350,
+      "bytes": 632004
+    },
+    {
+      "source": "photo_2026-11-22 04.25.02.jpeg",
+      "output": "images/yard/kiosk-row-red.jpg",
+      "alt": "Red container retail kiosks with white roller shutters in the yard",
+      "sha256": "0dee4993cb9426b64d56dea418d7842d81066b6dbd5abd1e50d4683affdd0736",
+      "width": 1280,
+      "height": 960,
+      "bytes": 208939
+    },
+    {
+      "source": "photo_2026-11-22 04.25.16.jpeg",
+      "output": "images/yard/kiosk-shell-orange.jpg",
+      "alt": "Orange and black container shell before fit-out",
+      "sha256": "ab668e5313790d308d79bc1694305909c22b0082c57bf715eb26bd7e3a4662ca",
+      "width": 1125,
+      "height": 2000,
+      "bytes": 279969
+    },
+    {
+      "source": "photo_2026-11-22 04.25.19.jpeg",
+      "output": "images/yard/kiosk-row-black.jpg",
+      "alt": "Row of black container kiosks with roller shutters",
+      "sha256": "2836fd61da5eec09949fb0ae7dc850b8e7a29cb7db3c8d71570cf5d7a60ca948",
+      "width": 2000,
+      "height": 1125,
+      "bytes": 462494
+    },
+    {
+      "source": "photo_2026-11-22 04.25.23.jpeg",
+      "output": "images/yard/kiosk-two-storey.jpg",
+      "alt": "Two-storey container office structure with grey cladding",
+      "sha256": "44d4073f4518edf9d08ee965bf6cefe4881d4ce3c5a59091002dbab6433d1504",
+      "width": 1125,
+      "height": 2000,
+      "bytes": 400727
+    },
+    {
+      "source": "photo_2026-11-22 04.25.26.jpeg",
+      "output": "images/yard/kiosk-row-grey.jpg",
+      "alt": "Grey container kiosks with roller shutters, side view",
+      "sha256": "25ad76b66589dcea5feb23af1f5a0aeecf81761a11b7fe312d2df516dfd93d82",
+      "width": 1125,
+      "height": 2000,
+      "bytes": 385690
+    },
+    {
+      "source": "photo_2026-11-22 04.25.37.jpeg",
+      "output": "images/yard/kiosk-row-green.jpg",
+      "alt": "Green container kiosks lined up in the yard",
+      "sha256": "b94c9afd40c250cdff801afd302e601ce7de1ff8474a5ebf202ed3da86f7fc31",
+      "width": 1125,
+      "height": 2000,
+      "bytes": 331498
+    },
+    {
+      "source": "photo_2026-11-22 04.25.40.jpeg",
+      "output": "images/yard/container-stack.jpg",
+      "alt": "Stacked used shipping containers in the yard",
+      "sha256": "eaea5e8c448b75c5ad4d2b499930ade70fd715122845b8508da1984ba761a8b0",
+      "width": 716,
+      "height": 1600,
+      "bytes": 208056
+    },
+    {
+      "source": "photo_2026-11-22 04.25.44.jpeg",
+      "output": "images/yard/container-stack-high-cube.jpg",
+      "alt": "Stacked yellow and red high cube containers",
+      "sha256": "0fdf535a17a08d025e5d1fea9bb713950af50617f11b77d6d1057889c9c6debc",
+      "width": 716,
+      "height": 1600,
+      "bytes": 171242
+    },
+    {
+      "source": "photo_2026-11-22 04.25.47.jpeg",
+      "output": "images/yard/kiosk-row-orange.jpg",
+      "alt": "Orange and black container kiosks with roller shutters",
+      "sha256": "92e6ddf35d3b3ce33d5c092b017ee09599b5a343651b51c6ae262f5d5fc3edd4",
+      "width": 960,
+      "height": 1280,
+      "bytes": 264130
+    },
+    {
+      "source": "photo_2026-11-22 04.25.50.jpeg",
+      "output": "images/interiors/office-interior.jpg",
+      "alt": "Finished container office interior with glass doors and timber floor",
+      "sha256": "7894d04c71e852e8c0ead34458401298126200906537967b02d66014957b2c67",
+      "width": 1125,
+      "height": 1500,
+      "bytes": 227026
+    },
+    {
+      "source": "photo_2026-11-22 04.25.56.jpeg",
+      "output": "images/homes/container-home-exterior.jpg",
+      "alt": "Container home exterior with a timber veranda",
+      "sha256": "75c754eed37c0d06974f38b0298c5f445121e3f95cc2603034ddfcc571740945",
+      "width": 1125,
+      "height": 1500,
+      "bytes": 295233
+    },
+    {
+      "source": "photo_2026-11-22 04.25.59.jpeg",
+      "output": "images/interiors/container-home-kitchen.jpg",
+      "alt": "Container home kitchen with cabinets and tiled walls",
+      "sha256": "982bb671d2add25a9dae36ca4f823bced9ff97cc26a9e3c9f461084552ef8d86",
+      "width": 1125,
+      "height": 1500,
+      "bytes": 137780
+    },
+    {
+      "source": "photo_2026-11-22 16.51.57.jpeg",
+      "output": "images/yard/kiosk-row-blue.jpg",
+      "alt": "Blue container kiosks with roller shutters",
+      "sha256": "adeff8f89cfa85e155745e5e972eeeac6b255975773329b60712590accdb1d32",
+      "width": 720,
+      "height": 1280,
+      "bytes": 129876
+    },
+    {
+      "source": "photo_2026-11-22 16.52.25.jpeg",
+      "output": "images/yard/container-20ft-red.jpg",
+      "alt": "Red 20ft shipping container on the ground at the yard",
+      "sha256": "90074d5a637230036a877f201f87cb570b65ca5f5fe7a07f22cf20e11f63e50f",
+      "width": 720,
+      "height": 1280,
+      "bytes": 202537
+    },
+    {
+      "source": "photo_2026-11-22 16.52.28.jpeg",
+      "output": "images/delivery/container-on-truck.jpg",
+      "alt": "Shipping container loaded on a flatbed truck",
+      "sha256": "1b654a22c6f668080145721ead88da5da221682ed39aec55c5de873b8f8f1d70",
+      "width": 720,
+      "height": 1280,
+      "bytes": 128405
+    },
+    {
+      "source": "photo_2026-11-22 16.52.38.jpeg",
+      "output": "images/delivery/mobile-unit-truck.jpg",
+      "alt": "Patterned container unit loaded on a truck",
+      "sha256": "deb16d138a8181d16c669367fd7145b1b1a8c131cab024024e6d8b13f4bb4b72",
+      "width": 1280,
+      "height": 720,
+      "bytes": 167296
+    },
+    {
+      "source": "photo_2026-11-22 16.52.41.jpeg",
+      "output": "images/yard/kiosk-row-patterned.jpg",
+      "alt": "Green, white and yellow container kiosks",
+      "sha256": "da4da4c7476b7996369107749a9292c91d5c1550b5fc4bb66d15a6b3b83dd058",
+      "width": 1125,
+      "height": 2000,
+      "bytes": 368754
+    },
+    {
+      "source": "generated",
+      "output": "images/photo-coming-soon.jpg",
+      "alt": "Photos coming soon — ask the yard for current photos of this unit",
+      "sha256": null,
+      "width": 1600,
+      "height": 1200,
+      "bytes": 71497
+    }
+  ],
+  "video": {
+    "source": "telegram-cloud-document-4-5769348857691382517.mp4",
+    "output": "videos/hero-yard.mp4",
+    "sha256": "082c0b8ccb2146819f913c98629c77b9fe858d5c5cd1d0cecfd0741ac431adb9",
+    "bytes": 7402746
+  },
+  "excluded": [
+    {
+      "source": "photo_2026-11-22 04.25.53.jpeg",
+      "reason": "KerGen branded generator enclosure; exclude until permission is confirmed"
+    },
+    {
+      "source": "photo_2026-11-22 04.26.02.jpeg",
+      "reason": "DEFNS branded office; exclude until permission is confirmed"
+    }
+  ]
+}

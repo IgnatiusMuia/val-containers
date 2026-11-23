@@ -27,12 +27,12 @@ export const faqs: Faq[] = [
   {
     question: "What do WWT and cargo worthy mean?",
     answer:
-      "WWT means wind and watertight: the container has no holes and the door seals keep out weather, though it may show surface rust or dents. Cargo worthy means the unit is structurally sound and suitable for freight or conversion. Every listing states the grade, and the condition report explains what we found.",
+      "WWT means wind and watertight: the container has no holes and the door seals keep out weather, though it may show surface rust or dents. Cargo worthy means the unit is structurally sound and suitable for freight or conversion. Every listing states the grade. Ask for the current condition notes and inspection photos for the exact unit.",
   },
   {
     question: "Can I inspect the container before paying?",
     answer:
-      "Yes. The yard is open 24 hours and you can inspect any unit in person. If you are upcountry, we send current photos and a video walkaround of the exact container, including the CSC plate and serial number. We do not swap units after payment.",
+      "Yes. The yard is open 24 hours and you can inspect any unit in person. If you are upcountry, we can send current photos and a video walkaround of the exact container where available, including the serial and any CSC plate. Confirm what is available before paying. We do not swap units after payment.",
   },
   {
     question: "Do you deliver outside Kenya?",
@@ -42,12 +42,12 @@ export const faqs: Faq[] = [
   {
     question: "What documents come with a container?",
     answer:
-      "Every unit comes with a bill of sale, a condition report with inspection photos, and CSC plate and serial verification. Fabricated units also include electrical and plumbing layout drawings where relevant, plus a fit-out snag list. These documents are what make a container straightforward to resell or finance.",
+      "Paperwork is confirmed against the exact unit before payment. Depending on the unit, this can include a bill of sale, condition notes, serial details and a CSC plate where applicable. Fabricated units can include electrical and plumbing layout drawings where relevant, plus a fit-out snag list. Ask what is available for the unit you are considering.",
   },
   {
     question: "Is a reefer expensive to run?",
     answer:
-      "A working reefer draws significant power, usually from a 3-phase supply. Running costs depend on the setpoint, ambient temperature and how often the door is opened. We share the unit's test sheet and power requirements so your electrician can size the supply before delivery.",
+      "A working reefer draws significant power, usually from a 3-phase supply. Running costs depend on the setpoint, ambient temperature and how often the door is opened. Ask for the current test sheet and power requirements so your electrician can size the supply before delivery.",
   },
   {
     question: "Can you fit out a container I already own?",

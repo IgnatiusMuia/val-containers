@@ -2,10 +2,9 @@ export type ContainerType = "plain" | "fabricated" | "refrigerated";
 export type ContainerSize = "20ft" | "40ft" | "40ft-hc";
 export type ContainerCondition = "new" | "used";
 
-export interface ContainerImage {
-  src: string;
-  alt: string;
-}
+export type ContainerMedia =
+  | { kind: "image"; src: string; alt: string }
+  | { kind: "video"; src: string; alt: string; poster: string };
 
 export interface ContainerSpecs {
   external: string;
@@ -32,7 +31,8 @@ export interface Container {
   conditionLabel: string;
   grade: string;
   price: number;
-  images: ContainerImage[];
+  media: ContainerMedia[];
+  photosAreRepresentative?: boolean;
   description: string;
   highlights: string[];
   specs: ContainerSpecs;
@@ -44,11 +44,20 @@ export interface Container {
   addedAt: string;
   stock: number;
   year: number;
+  status?: "available" | "reserved" | "sold";
 }
 
-const img = (id: string, alt: string, width = 1600): ContainerImage => ({
-  src: `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${width}&q=80`,
+const image = (file: string, alt: string): ContainerMedia => ({
+  kind: "image",
+  src: `/media/images/${file}`,
   alt,
+});
+
+const video = (file: string, alt: string, poster: string): ContainerMedia => ({
+  kind: "video",
+  src: `/media/videos/${file}`,
+  alt,
+  poster: `/media/images/${poster}`,
 });
 
 const dry20 = {
@@ -175,26 +184,31 @@ export const containers: Container[] = [
     conditionLabel: "Used · WWT",
     grade: "B+",
     price: 185000,
-    images: [
-      img("1696324535687-6bb987f50e96", "Used 20ft dry shipping container with steel doors at the yard"),
-      img("1713950653257-33abeea82b40", "CSC plate, max gross weight and tare markings on a container door"),
-      img("1601108122462-8a69128bb3ce", "Green used shipping container door and locking bars"),
-      img("1610957601813-3b93a900a05b", "Red shipping container parked beside a warehouse"),
+    media: [
+      image("yard/container-stack.jpg", "Stacked used shipping containers at the Nairobi yard"),
+      image("yard/container-20ft-red.jpg", "Red 20ft shipping container on the ground at the yard"),
+      image("delivery/container-on-truck.jpg", "Shipping container loaded on a flatbed truck for delivery"),
+      video(
+        "hero-yard.mp4",
+        "Yard footage: forklift lifting a red 20ft container",
+        "yard/container-20ft-red.jpg",
+      ),
     ],
+    photosAreRepresentative: true,
     description:
-      "A clean, wind-and-watertight 20ft dry container for secure storage, site tooling or a straightforward conversion base. Floors are solid, door seals have been checked, and the unit is sold with its condition report and CSC plate photos.",
+      "A clean, wind-and-watertight 20ft dry container for secure storage, site tooling or a straightforward conversion base. Floors are solid and door seals have been checked. Ask for current photos, condition notes and any CSC plate details before payment.",
     highlights: ["Wind & watertight", "Solid plywood floor", "Delivery ready"],
     specs: dry20,
     conditionReport: [
       "Surface rust at the bottom rails; no perforation found during inspection.",
       "Door gaskets flexible and sealing correctly; lock rods operate cleanly.",
       "Floor solid across all bays with minor scuffs from previous cargo.",
-      "CSC plate present and serial numbers photographed for the file.",
+      "Ask for the serial and CSC plate details for the exact unit.",
     ],
     included: [
-      "Condition report with inspection photos",
-      "Bill of sale in the buyer's name",
-      "CSC plate and serial verification",
+      "Condition notes and current photos on request",
+      "Bill of sale",
+      "CSC plate and serial details where available",
       "Delivery planning and crane booking",
       "Yard viewing before payment",
     ],
@@ -205,7 +219,7 @@ export const containers: Container[] = [
       "Ready for shelving, racking or a basic fit-out",
     ],
     bestFor: ["Secure storage", "Construction sites", "Equipment lock-up"],
-    featured: false,
+    featured: true,
     addedAt: "2026-10-12",
     stock: 4,
     year: 2021,
@@ -222,11 +236,11 @@ export const containers: Container[] = [
     conditionLabel: "One-trip new",
     grade: "A+",
     price: 430000,
-    images: [
-      img("1758777625576-09fc43631902", "New one-trip blue 20ft shipping container in the yard"),
-      img("1504383633899-a17806f7e9ad", "Clean blue shipping container side under a clear sky"),
-      img("1713950653257-33abeea82b40", "CSC plate and container weight markings on a new container door"),
-      img("1696324535687-6bb987f50e96", "Steel container doors and locking gear"),
+    media: [
+      image(
+        "photo-coming-soon.jpg",
+        "Photos of the one-trip 20ft container coming soon — ask the yard for current photos",
+      ),
     ],
     description:
       "A near-new, one-trip 20ft container with factory paint, straight panels and clean floors. This is the unit to choose when presentation matters — branding, a shopfront, an office shell or a home conversion that starts with a sound envelope.",
@@ -239,9 +253,9 @@ export const containers: Container[] = [
       "Interior clean, dry and free of odour or residue.",
     ],
     included: [
-      "Condition report with inspection photos",
-      "Bill of sale in the buyer's name",
-      "CSC plate and serial verification",
+      "Condition notes and current photos on request",
+      "Bill of sale",
+      "CSC plate and serial details where available",
       "Delivery planning and crane booking",
       "Yard viewing before payment",
     ],
@@ -252,7 +266,7 @@ export const containers: Container[] = [
       "Best base for high-finish conversions",
     ],
     bestFor: ["Branded retail", "Office conversion", "Premium storage"],
-    featured: true,
+    featured: false,
     addedAt: "2026-11-08",
     stock: 3,
     year: 2026,
@@ -269,26 +283,26 @@ export const containers: Container[] = [
     conditionLabel: "Used · WWT",
     grade: "B+",
     price: 295000,
-    images: [
-      img("1698392275407-e6f844224692", "Row of used 40ft shipping containers in red and blue"),
-      img("1691481486044-04f12d77a92c", "Orange shipping container doors with locking bars"),
-      img("1573030889348-c6b0f8b15e40", "Stacked shipping containers under a blue sky"),
-      img("1601108122462-8a69128bb3ce", "Green container door close-up"),
+    media: [
+      image("yard/container-stack.jpg", "Stacked used dry shipping containers at the yard"),
+      image("yard/container-stack-high-cube.jpg", "Stacked high cube containers at the yard"),
+      image("delivery/container-on-truck.jpg", "Container loaded on a flatbed truck for delivery"),
     ],
+    photosAreRepresentative: true,
     description:
       "Double the floor area of a 20ft unit for a modest price step. This 40ft dry container is ideal for bulk storage, a workshop or a multi-room conversion shell. Inspected, wind-and-watertight and ready to leave the yard.",
     highlights: ["28.3 m² floor", "Bulk storage", "Cargo-worthy envelope"],
     specs: dry40,
     conditionReport: [
       "Light surface corrosion on the roof and bottom rails; no soft metal.",
-      "Door seals verified with a water test at the yard.",
+      "Door seals checked at the last yard inspection.",
       "Plywood floor solid; minor dents from pallet traffic.",
-      "Serial and CSC plate photographed and recorded.",
+      "Ask for the serial and CSC plate details for the exact unit.",
     ],
     included: [
-      "Condition report with inspection photos",
-      "Bill of sale in the buyer's name",
-      "CSC plate and serial verification",
+      "Condition notes and current photos on request",
+      "Bill of sale",
+      "CSC plate and serial details where available",
       "Delivery planning and crane booking",
       "Yard viewing before payment",
     ],
@@ -316,12 +330,12 @@ export const containers: Container[] = [
     conditionLabel: "Used · Cargo worthy",
     grade: "A−",
     price: 355000,
-    images: [
-      img("1533643643812-4143839ba096", "Stacked orange and red 40ft shipping containers"),
-      img("1767884163408-fc4fc6b2c0a0", "Colourful stacked high cube containers"),
-      img("1713950653257-33abeea82b40", "CSC plate and container specification markings"),
-      img("1691481486044-04f12d77a92c", "Orange container doors and locking hardware"),
+    media: [
+      image("yard/container-stack-high-cube.jpg", "Stacked yellow and red high cube containers at the yard"),
+      image("yard/container-stack.jpg", "Stacked used shipping containers at the yard"),
+      image("delivery/container-on-truck.jpg", "Container loaded on a flatbed truck"),
     ],
+    photosAreRepresentative: true,
     description:
       "A cargo-worthy 40ft high cube with the extra 30cm of headroom that makes a real difference in homes and offices. Strong enough for freight use, clean enough to convert. The extra height leaves room for insulation, ceiling services and a proper finish.",
     highlights: ["Extra headroom", "Cargo worthy", "Home & office ready"],
@@ -333,9 +347,9 @@ export const containers: Container[] = [
       "Doors, gaskets and locking bars in working order.",
     ],
     included: [
-      "Condition report with inspection photos",
-      "Bill of sale in the buyer's name",
-      "CSC plate and serial verification",
+      "Condition notes and current photos on request",
+      "Bill of sale",
+      "CSC plate and serial details where available",
       "Delivery planning and crane booking",
       "Yard viewing before payment",
     ],
@@ -346,7 +360,7 @@ export const containers: Container[] = [
       "The most popular base for container homes",
     ],
     bestFor: ["Container homes", "Site offices", "High-volume storage"],
-    featured: false,
+    featured: true,
     addedAt: "2026-09-10",
     stock: 2,
     year: 2022,
@@ -363,11 +377,11 @@ export const containers: Container[] = [
     conditionLabel: "One-trip new",
     grade: "A+",
     price: 760000,
-    images: [
-      img("1778533300344-23ac61c4ca86", "New high cube shipping containers stacked under a blue sky"),
-      img("1758777625576-09fc43631902", "Clean blue container side"),
-      img("1504383633899-a17806f7e9ad", "Blue shipping container against a clear sky"),
-      img("1713950653257-33abeea82b40", "CSC plate and weight markings on a container"),
+    media: [
+      image(
+        "photo-coming-soon.jpg",
+        "Photos of the one-trip 40ft high cube coming soon — ask the yard for current photos",
+      ),
     ],
     description:
       "The premium blank canvas: a one-trip 40ft high cube with maximum volume, factory paint and no repair history. If you are building a home, a flagship office or a branded retail unit, start here — fewer surprises under the cladding.",
@@ -375,14 +389,14 @@ export const containers: Container[] = [
     specs: { ...hc40, tare: "3,910 kg", payload: "26,570 kg" },
     conditionReport: [
       "One-trip unit with factory paint throughout.",
-      "No dents, patch welds or roof repairs.",
+      "No dents or patch welds observed at the last yard check.",
       "Doors and seals as delivered from the factory.",
       "Interior clean and ready for lining or fit-out.",
     ],
     included: [
-      "Condition report with inspection photos",
-      "Bill of sale in the buyer's name",
-      "CSC plate and serial verification",
+      "Condition notes and current photos on request",
+      "Bill of sale",
+      "CSC plate and serial details where available",
       "Delivery planning and crane booking",
       "Yard viewing before payment",
     ],
@@ -393,7 +407,7 @@ export const containers: Container[] = [
       "Long service life with minimal maintenance",
     ],
     bestFor: ["Container homes", "Premium offices", "Branded retail"],
-    featured: true,
+    featured: false,
     addedAt: "2026-10-22",
     stock: 1,
     year: 2026,
@@ -410,12 +424,13 @@ export const containers: Container[] = [
     conditionLabel: "New build",
     grade: "A",
     price: 595000,
-    images: [
-      img("1696454595486-bdb174df034e", "Container office structure with glazing and a walkway"),
-      img("1497366216548-37526070297c", "Modern office interior with desk and lighting"),
-      img("1497366811353-6870744d04b2", "Glass-walled office meeting room"),
-      img("1713950653257-33abeea82b40", "Container door specification markings"),
+    media: [
+      image("interiors/office-interior.jpg", "Finished container office interior with glass doors and timber floor"),
+      image("yard/kiosk-shell-orange.jpg", "Orange and black container shell before office fit-out"),
+      image("yard/kiosk-two-storey.jpg", "Two-storey container office structure with grey cladding"),
+      image("yard/kiosk-row-orange.jpg", "Orange container office units with roller shutters"),
     ],
+    photosAreRepresentative: true,
     description:
       "A turnkey 20ft site office built on a new container shell. Insulated walls and ceiling, LED lighting, power sockets, sliding windows and a steel personnel door. Delivered ready to furnish — desk, chairs and a kettle are all you need to add.",
     highlights: ["Insulated & wired", "Personnel door", "Two windows"],
@@ -423,13 +438,13 @@ export const containers: Container[] = [
     conditionReport: [
       "Built on a one-trip 20ft shell with no structural repairs.",
       "All fabrication welds inspected and primed before topcoat.",
-      "Electrical circuits tested; consumer unit labelled.",
+      "Electrical circuits checked before dispatch; confirm labelling on inspection.",
       "Snag walk completed before dispatch.",
     ],
     included: [
       "Electrical layout drawing",
       "Fit-out snag list",
-      "Condition report with inspection photos",
+      "Condition notes and current photos on request",
       "Delivery planning and crane booking",
       "Care and maintenance sheet",
     ],
@@ -440,7 +455,7 @@ export const containers: Container[] = [
       "Wall-mounted AC provision",
     ],
     bestFor: ["Site offices", "Project management", "Gatehouses"],
-    featured: true,
+    featured: false,
     addedAt: "2026-11-05",
     stock: 2,
     year: 2026,
@@ -457,12 +472,12 @@ export const containers: Container[] = [
     conditionLabel: "New build",
     grade: "A",
     price: 1180000,
-    images: [
-      img("1623731389652-079c8732ed34", "Modern fabricated container office exterior with glazing"),
-      img("1517502884422-41eaead166d4", "Office meeting room with natural light"),
-      img("1497366754035-f200968a6e72", "Modern office lounge and work area"),
-      img("1713950653257-33abeea82b40", "CSC plate and container markings"),
+    media: [
+      image("interiors/office-interior.jpg", "Finished container office interior with glass doors"),
+      image("yard/kiosk-row-orange.jpg", "Orange container office units in the yard"),
+      image("yard/kiosk-two-storey.jpg", "Two-storey container office structure"),
     ],
+    photosAreRepresentative: true,
     description:
       "A 40ft two-room office for teams that need a proper working environment on site. Two insulated rooms, a shared lobby, two personnel doors, LED lighting and AC provision. Built to be lived in for the length of a project, then moved to the next one.",
     highlights: ["Two private rooms", "Shared lobby", "AC provision"],
@@ -470,13 +485,13 @@ export const containers: Container[] = [
     conditionReport: [
       "Built on a cargo-worthy 40ft shell with no structural repairs.",
       "Steel partitions and door frames primed and top-coated.",
-      "Electrical installation tested and labelled room by room.",
+      "Electrical installation checked room by room; confirm labelling on inspection.",
       "Snag walk completed with the fabrication lead before dispatch.",
     ],
     included: [
       "Electrical layout drawing",
       "Room-by-room fit-out schedule",
-      "Condition report with inspection photos",
+      "Condition notes and current photos on request",
       "Delivery planning and crane booking",
       "Care and maintenance sheet",
     ],
@@ -504,12 +519,15 @@ export const containers: Container[] = [
     conditionLabel: "New build",
     grade: "A",
     price: 520000,
-    images: [
-      img("1764344815220-2cbf59c95f46", "Container retail kiosk with roller shutter and outdoor seating"),
-      img("1529939828339-56039bb75a63", "Container cafe unit with glazing and service area"),
-      img("1691481486044-04f12d77a92c", "Container doors and locking bars"),
-      img("1696324535687-6bb987f50e96", "Steel container doors"),
+    media: [
+      image("yard/kiosk-row-red.jpg", "Red container retail kiosks with white roller shutters"),
+      image("yard/kiosk-row-black.jpg", "Black container kiosks with roller shutters"),
+      image("yard/kiosk-row-blue.jpg", "Blue container kiosks with roller shutters"),
+      image("yard/kiosk-row-green.jpg", "Green container kiosks in the yard"),
+      image("yard/kiosk-row-orange.jpg", "Orange container kiosks with roller shutters"),
+      image("yard/kiosk-row-patterned.jpg", "Patterned container kiosks in green, white and yellow"),
     ],
+    photosAreRepresentative: true,
     description:
       "A roadside-ready 20ft kiosk with a roller shutter, serving counter and lockable hatch. Built for retail, food service or a mobile brand activation. The shell is insulated and wired, so you can open for business as soon as it is placed.",
     highlights: ["Roller shutter", "Serving counter", "Wired & insulated"],
@@ -525,14 +543,14 @@ export const containers: Container[] = [
     },
     conditionReport: [
       "Built on an inspected 20ft shell with straight panels.",
-      "Shutter and lock tested; counter hatch operates cleanly.",
-      "Electrical circuits tested and labelled.",
+      "Shutter and lock checked; confirm operation on inspection.",
+      "Electrical circuits checked; confirm labelling on inspection.",
       "Exterior primed and top-coated for roadside conditions.",
     ],
     included: [
       "Electrical layout drawing",
       "Fit-out snag list",
-      "Condition report with inspection photos",
+      "Condition notes and current photos on request",
       "Delivery planning and crane booking",
       "Care and maintenance sheet",
     ],
@@ -560,11 +578,11 @@ export const containers: Container[] = [
     conditionLabel: "New build",
     grade: "A",
     price: 820000,
-    images: [
-      img("1745566589290-d678de04f990", "Yellow container cabin set in a garden"),
-      img("1599813674302-e3b2bc05695f", "Compact bedroom interior with timber ceiling"),
-      img("1693515184806-c94ead5b8400", "Container home on stilts with a timber deck"),
-      img("1628394029761-acc83a2a08a6", "Container home with large glazing under trees"),
+    media: [
+      image(
+        "photo-coming-soon.jpg",
+        "Photos of the 20ft container studio coming soon — ask the yard for current photos",
+      ),
     ],
     description:
       "A compact guest studio or starter home in a 20ft footprint. Insulated, wired, plumbed and finished with a shower room and kitchenette. Ideal for a guest suite, a farm stay or a secure city pad where land is tight.",
@@ -580,14 +598,14 @@ export const containers: Container[] = [
     },
     conditionReport: [
       "Built on a one-trip 20ft shell with no structural repairs.",
-      "Plumbing pressure-tested and drainage checked before dispatch.",
-      "Electrical circuits tested and labelled.",
+      "Plumbing and drainage checked before dispatch; confirm on inspection.",
+      "Electrical circuits checked; confirm labelling on inspection.",
       "Interior finishes inspected and snag-listed.",
     ],
     included: [
       "Electrical and plumbing layout drawings",
       "Fit-out snag list",
-      "Condition report with inspection photos",
+      "Condition notes and current photos on request",
       "Delivery planning and crane booking",
       "Care and maintenance sheet",
     ],
@@ -615,12 +633,12 @@ export const containers: Container[] = [
     conditionLabel: "New build",
     grade: "A",
     price: 2450000,
-    images: [
-      img("1628394029761-acc83a2a08a6", "Container home with large glazing under mature trees"),
-      img("1523351964962-1ee5847816c3", "Modern container home over water with glass doors"),
-      img("1693515184806-c94ead5b8400", "Container home on stilts with outdoor deck"),
-      img("1599813674302-e3b2bc05695f", "Bedroom interior with timber ceiling"),
+    media: [
+      image("homes/container-home-exterior.jpg", "Container home exterior with a timber veranda"),
+      image("interiors/container-home-kitchen.jpg", "Container home kitchen with cabinets and tiled walls"),
+      image("yard/container-stack-high-cube.jpg", "High cube containers used as the base for conversions"),
     ],
+    photosAreRepresentative: true,
     description:
       "A two-bedroom container home built on a 40ft high cube shell. Insulated, wired, plumbed and finished to a comfortable residential standard, with a lounge, kitchen, bathroom and two bedrooms. A realistic alternative to a stone build when speed and predictability matter.",
     highlights: ["Two bedrooms", "Full fit-out", "40ft high cube"],
@@ -637,13 +655,13 @@ export const containers: Container[] = [
     conditionReport: [
       "Built on a cargo-worthy 40ft high cube shell.",
       "Roof and floor checked for water ingress before lining.",
-      "Plumbing pressure-tested and electrical circuits certified on site.",
+      "Plumbing and electrical work checked on site; confirm certification on inspection.",
       "Residential snag walk completed before handover.",
     ],
     included: [
       "Electrical and plumbing layout drawings",
       "Room-by-room fit-out schedule",
-      "Condition report with inspection photos",
+      "Condition notes and current photos on request",
       "Delivery planning and crane booking",
       "Care and maintenance sheet",
     ],
@@ -654,7 +672,7 @@ export const containers: Container[] = [
       "Designed for quick connection to site services",
     ],
     bestFor: ["Family homes", "Guest accommodation", "Staff housing"],
-    featured: false,
+    featured: true,
     addedAt: "2026-10-28",
     stock: 1,
     year: 2026,
@@ -671,26 +689,26 @@ export const containers: Container[] = [
     conditionLabel: "Used · Working",
     grade: "B+",
     price: 1250000,
-    images: [
-      img("1611224097891-83220d09271a", "White refrigerated container with a Carrier cooling unit"),
-      img("1609143739217-01b60dad1c67", "Clean cold storage interior with stacked cartons"),
-      img("1713950653257-33abeea82b40", "Container door specification markings"),
-      img("1601108122462-8a69128bb3ce", "Container door hardware close-up"),
+    media: [
+      image(
+        "photo-coming-soon.jpg",
+        "Photos of the 20ft refrigerated container coming soon — ask the yard for current photos",
+      ),
     ],
     description:
-      "A working 20ft refrigerated container with a Carrier Vector unit, tested across its temperature range at the yard. For produce, meat, dairy or flowers where a cold chain cannot fail. Requires 3-phase power on site.",
+      "A 20ft refrigerated container with a Carrier Vector unit, suited to produce, meat, dairy or flowers where a cold chain cannot fail. Ask for the current test sheet before payment. Requires 3-phase power on site.",
     highlights: ["Carrier cooling", "−30 °C to +25 °C", "3-phase power"],
     specs: reefer20,
     conditionReport: [
-      "Cooling unit serviced and run-tested across the full temperature range.",
+      "Ask for the current cooling-unit test sheet.",
       "Insulated panels and door gaskets checked for air leakage.",
       "Aluminium T-floor clean with drainage channels clear.",
-      "Control panel and fault alarms tested.",
+      "Control panel and alarms checked; confirm on inspection.",
     ],
     included: [
-      "Cooling unit test sheet",
-      "Condition report with inspection photos",
-      "Bill of sale in the buyer's name",
+      "Cooling-unit test sheet on request",
+      "Condition notes and current photos on request",
+      "Bill of sale",
       "Delivery planning and crane booking",
       "On-site power requirements checklist",
     ],
@@ -718,26 +736,26 @@ export const containers: Container[] = [
     conditionLabel: "Used · Working",
     grade: "B+",
     price: 1720000,
-    images: [
-      img("1611224097891-83220d09271a", "White refrigerated container with cooling machinery"),
-      img("1595871685450-d5d2e8847a64", "Insulated refrigerated container unit at the yard"),
-      img("1609143739217-01b60dad1c67", "Cold storage interior with stacked cartons"),
-      img("1713950653257-33abeea82b40", "Container door specification markings"),
+    media: [
+      image(
+        "photo-coming-soon.jpg",
+        "Photos of the 40ft high cube reefer coming soon — ask the yard for current photos",
+      ),
     ],
     description:
       "A 40ft high cube reefer with a Thermo King Magnum unit for larger cold-storage volumes. Suited to distributors, farms and food processors who need reliable temperature control without building a cold room from scratch.",
     highlights: ["Thermo King unit", "67 m³ capacity", "3-phase power"],
     specs: reefer40,
     conditionReport: [
-      "Cooling unit serviced and run-tested at multiple setpoints.",
+      "Ask for the current cooling-unit test sheet.",
       "Door gaskets and insulated panels checked for leakage.",
-      "Aluminium T-floor cleaned and drainage verified.",
-      "Control panel and high-temperature alarms tested.",
+      "Aluminium T-floor cleaned and drainage checked.",
+      "Control panel and alarms checked; confirm on inspection.",
     ],
     included: [
-      "Cooling unit test sheet",
-      "Condition report with inspection photos",
-      "Bill of sale in the buyer's name",
+      "Cooling-unit test sheet on request",
+      "Condition notes and current photos on request",
+      "Bill of sale",
       "Delivery planning and crane booking",
       "On-site power requirements checklist",
     ],
@@ -754,6 +772,20 @@ export const containers: Container[] = [
     year: 2020,
   },
 ];
+
+export function primaryImage(container: Container) {
+  const first = container.media[0];
+  if (!first) return { src: "", alt: "" };
+  return first.kind === "image"
+    ? { src: first.src, alt: first.alt }
+    : { src: first.poster, alt: first.alt };
+}
+
+export function containerImageUrls(container: Container) {
+  return container.media.map((item) =>
+    item.kind === "image" ? item.src : item.poster,
+  );
+}
 
 export const featuredContainers = containers.filter((container) => container.featured);
 

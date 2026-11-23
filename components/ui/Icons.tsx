@@ -30,7 +30,9 @@ export type IconName =
   | "pallet"
   | "car"
   | "volume"
-  | "calendar";
+  | "calendar"
+  | "play"
+  | "pause";
 
 const strokePaths: Record<Exclude<IconName, "whatsapp" | "star">, React.ReactNode> = {
   phone: (
@@ -202,6 +204,13 @@ const strokePaths: Record<Exclude<IconName, "whatsapp" | "star">, React.ReactNod
       <path d="M3 10h18" />
       <path d="M8 3v4" />
       <path d="M16 3v4" />
+    </>
+  ),
+  play: <path d="m8 5 11 7-11 7Z" fill="currentColor" />,
+  pause: (
+    <>
+      <path d="M9 5v14" />
+      <path d="M15 5v14" />
     </>
   ),
 };

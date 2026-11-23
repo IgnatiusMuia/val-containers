@@ -2,10 +2,10 @@ export const site = {
   name: "Val Containers",
   legalName: "Val Containers",
   tagline:
-    "We sell well-documented plain, fabricated, and refrigerated containers all across the country.",
+    "Plain, fabricated and refrigerated containers with clear prices and condition notes, delivered across Kenya.",
   description:
-    "Well-documented shipping containers for sale in Kenya. Plain, fabricated and refrigerated units with published KES prices, condition reports and countrywide delivery from our Nairobi yard.",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://valcontainers.co.ke",
+    "Shipping containers for sale in Kenya. Plain, fabricated and refrigerated units with published KES prices, condition notes and countrywide delivery from our Nairobi yard.",
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://val-containers.vercel.app",
   phoneDisplay: "+254 795 506 397",
   phoneHref: "tel:+254795506397",
   whatsappNumber: "254795506397",
@@ -33,19 +33,19 @@ export const nav = [
 ] as const;
 
 export const stats = [
-  { value: 500, suffix: "+", label: "Containers delivered" },
-  { value: 47, suffix: "", label: "Counties served" },
+  { value: 12, suffix: "", label: "Listings online" },
+  { value: 9, suffix: "", label: "Delivery regions" },
   { value: 24, suffix: "/7", label: "Yard access" },
-  { value: 100, suffix: "%", label: "Documented units" },
+  { value: 1, suffix: "", label: "Written quote" },
 ] as const;
 
 export const trustPoints = [
-  "Well-documented containers",
+  "Published prices",
   "Countrywide delivery",
-  "Flexible payments",
-  "Free consultation",
-  "CSC plates verified",
+  "Written quotes",
+  "Yard inspection",
   "Open 24 hours",
+  "Direct WhatsApp line",
 ] as const;
 
 export const quickActions = [
@@ -86,12 +86,3 @@ export const footerLinks = {
     { href: "/delivery#access", label: "Site access check" },
   ],
 } as const;
-
-export const trustLogos = [
-  { name: "Nyati Logistics", style: "font-display font-extrabold tracking-tight" },
-  { name: "Riftline Builders", style: "font-mono uppercase tracking-[0.24em]" },
-  { name: "Pwani Fresh", style: "font-display italic font-semibold" },
-  { name: "Terra Schools", style: "font-sans font-bold tracking-tight" },
-  { name: "Kijani Retail", style: "font-mono uppercase tracking-[0.3em]" },
-  { name: "Highway Bakehouse", style: "font-display font-bold" },
-] as const;

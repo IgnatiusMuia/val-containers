@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getUseCase, useCases } from "@/data/use-cases";
-import { getContainer } from "@/data/containers";
+import { getContainer } from "@/lib/containers/repository";
 import { site } from "@/data/site";
 import { formatKES } from "@/lib/format";
 import { breadcrumbSchema } from "@/lib/schema";
@@ -11,6 +10,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { ButtonLink } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icons";
+import { SmartImage } from "@/components/ui/SmartImage";
 import { QuoteButton } from "@/components/forms/QuoteButton";
 import { ContainerCard } from "@/components/containers/ContainerCard";
 import { CtaBand } from "@/components/home/CtaBand";
@@ -62,9 +62,9 @@ export default async function UseCasePage({
   const useCase = getUseCase(slug);
   if (!useCase) notFound();
 
-  const recommended = useCase.related
-    .map((containerSlug) => getContainer(containerSlug))
-    .filter((container): container is NonNullable<typeof container> => Boolean(container));
+  const recommended = (
+    await Promise.all(useCase.related.map((containerSlug) => getContainer(containerSlug)))
+  ).filter((container): container is NonNullable<typeof container> => Boolean(container));
 
   return (
     <>
@@ -128,14 +128,16 @@ export default async function UseCasePage({
 
             <div className="lg:col-span-5">
               <div className="relative aspect-[4/3] overflow-hidden border border-bone/12">
-                <Image
+                <SmartImage
                   src={useCase.image.src}
                   alt={useCase.image.alt}
                   fill
                   sizes="(min-width: 1024px) 40vw, 100vw"
+                  wrapperClassName="absolute inset-0"
                   className="object-cover"
                   loading="eager"
                   fetchPriority="high"
+                  fallbackLabel="Use case photo coming soon"
                 />
               </div>
               <dl className="mt-2 grid grid-cols-3 gap-px border border-bone/10 bg-bone/10">

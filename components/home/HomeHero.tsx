@@ -1,39 +1,50 @@
+import { getContainers } from "@/lib/containers/repository";
+import { deliveryRegions } from "@/data/delivery";
 import { site } from "@/data/site";
+import { heroMedia } from "@/data/media";
 import { formatKES } from "@/lib/format";
 import { waLink, waMessages } from "@/lib/whatsapp";
 import { ButtonLink } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icons";
-import { SmartImage } from "@/components/ui/SmartImage";
 import { QuoteButton } from "@/components/forms/QuoteButton";
+import { HeroBackdrop } from "@/components/home/HeroBackdrop";
 
-const heroImage =
-  "https://images.unsplash.com/photo-1791101197556-9e1c839699d4?auto=format&fit=crop&w=2400&q=80";
+export async function HomeHero() {
+  const containers = await getContainers();
+  const listingCount = containers.length;
+  const minPrice = listingCount
+    ? Math.min(...containers.map((container) => container.price))
+    : 0;
+  const latestUpdate = containers.reduce(
+    (latest, container) =>
+      container.addedAt > latest ? container.addedAt : latest,
+    containers[0]?.addedAt ?? "",
+  );
+  const latestLabel = latestUpdate
+    ? new Intl.DateTimeFormat("en-KE", {
+        month: "long",
+        year: "numeric",
+      }).format(new Date(latestUpdate))
+    : "—";
 
-const ledger = [
-  ["Units in stock", "12"],
-  ["Refrigerated", "2 working"],
-  ["Yard access", "24/7"],
-] as const;
-
-export function HomeHero() {
+  const ledger = [
+    ["Listings online", String(listingCount)],
+    ["Delivery regions", String(deliveryRegions.length)],
+    ["Yard access", "24/7"],
+  ] as const;
   return (
     <section className="grain relative isolate flex min-h-[88svh] items-end overflow-hidden bg-ink">
-      <SmartImage
-        src={heroImage}
-        alt="Rows of shipping containers at a yard at dusk"
-        fill
-        loading="eager"
-        fetchPriority="high"
-        sizes="100vw"
-        wrapperClassName="absolute inset-0"
-        className="object-cover object-center"
+      <HeroBackdrop
+        videoSrc={heroMedia.video}
+        posterSrc={heroMedia.poster}
+        posterAlt={heroMedia.alt}
       />
       <div
-        className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,11,9,0.94)_0%,rgba(10,11,9,0.72)_48%,rgba(10,11,9,0.28)_100%)]"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(10,11,9,0.94)_0%,rgba(10,11,9,0.72)_48%,rgba(10,11,9,0.28)_100%)]"
         aria-hidden="true"
       />
       <div
-        className="absolute inset-0 bg-gradient-to-t from-ink via-ink/25 to-ink/40"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink via-ink/25 to-ink/40"
         aria-hidden="true"
       />
 
@@ -55,8 +66,8 @@ export function HomeHero() {
 
             <p className="mt-7 max-w-xl text-[15px] leading-relaxed text-bone/70 sm:text-base">
               Plain, fabricated and refrigerated containers with published
-              prices, written condition reports and CSC plates we can verify.
-              Inspect the exact unit before you pay.
+              prices, condition notes and the documents available for the exact
+              unit. Inspect before you pay, or ask for current photos and video.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -89,8 +100,8 @@ export function HomeHero() {
             </div>
 
             <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-bone/15 pt-5 font-mono text-[9px] uppercase tracking-[0.14em] text-bone/45 lg:hidden">
-              <span>12 units in stock</span>
-              <span>From KES 185,000</span>
+              <span>{listingCount} listings</span>
+              <span>From {formatKES(minPrice)}</span>
               <span>Open 24/7</span>
             </div>
           </div>
@@ -102,14 +113,13 @@ export function HomeHero() {
                 aria-hidden="true"
               />
               <div className="flex items-center justify-between gap-4">
-                <p className="eyebrow text-bone/50">Yard ledger</p>
-                <span className="inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.14em] text-whatsapp">
-                  <span className="h-1.5 w-1.5 rounded-full bg-whatsapp" />
-                  Live
+                <p className="eyebrow text-bone/50">Yard snapshot</p>
+                <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-bone/35">
+                  Current listings
                 </span>
               </div>
               <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.12em] text-bone/30">
-                Updated November 2026
+                Updated {latestLabel}
               </p>
 
               <dl className="mt-4 divide-y divide-bone/8 border-y border-bone/10">
@@ -131,7 +141,7 @@ export function HomeHero() {
                   Stock starts at
                 </span>
                 <p className="mt-1 font-display text-3xl font-semibold tracking-[-0.03em] text-bone">
-                  {formatKES(185000)}
+                  {formatKES(minPrice)}
                 </p>
                 <p className="mt-1 text-[11px] text-bone/40">
                   Published, not &ldquo;call for price&rdquo;.

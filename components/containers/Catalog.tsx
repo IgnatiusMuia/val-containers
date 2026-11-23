@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
-  containers,
+  type Container,
   type ContainerCondition,
   type ContainerSize,
   type ContainerType,
@@ -98,7 +98,13 @@ function FilterGroup({
   );
 }
 
-function CatalogUI({ initialType }: { initialType: TypeFilter }) {
+function CatalogUI({
+  initialType,
+  containers,
+}: {
+  initialType: TypeFilter;
+  containers: Container[];
+}) {
   const [query, setQuery] = useState("");
   const [type, setType] = useState<TypeFilter>(initialType);
   const [size, setSize] = useState<SizeFilter>("all");
@@ -157,7 +163,7 @@ function CatalogUI({ initialType }: { initialType: TypeFilter }) {
       }
       return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
     });
-  }, [query, type, size, condition, maxPrice, sort]);
+  }, [containers, query, type, size, condition, maxPrice, sort]);
 
   const progress = ((maxPrice - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100;
   const activeCount = [
@@ -428,7 +434,7 @@ function CatalogUI({ initialType }: { initialType: TypeFilter }) {
   );
 }
 
-export function Catalog() {
+export function Catalog({ containers }: { containers: Container[] }) {
   const searchParams = useSearchParams();
   const typeParam = searchParams.get("type");
   const initialType: TypeFilter =
@@ -442,6 +448,7 @@ export function Catalog() {
     <CatalogUI
       key={`${initialType}-${searchParams.toString()}`}
       initialType={initialType}
+      containers={containers}
     />
   );
 }

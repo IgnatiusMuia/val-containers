@@ -1,4 +1,5 @@
 import { stats } from "@/data/site";
+import { getContainers } from "@/lib/containers/repository";
 import { waLink, waMessages } from "@/lib/whatsapp";
 import { Counter } from "@/components/ui/Counter";
 import { Icon } from "@/components/ui/Icons";
@@ -13,12 +14,12 @@ const comparison = [
   },
   {
     label: "Condition",
-    val: "Photos + written report",
+    val: "Current photos + notes",
     other: "Sold as seen",
   },
   {
     label: "CSC & serial",
-    val: "Verified and shared",
+    val: "Shared where available",
     other: "Sometimes",
   },
   {
@@ -28,7 +29,7 @@ const comparison = [
   },
   {
     label: "Fabrication",
-    val: "One in-house team",
+    val: "Yard-led fabrication",
     other: "Outsourced",
   },
   {
@@ -38,7 +39,14 @@ const comparison = [
   },
 ] as const;
 
-export function WhyVal() {
+export async function WhyVal() {
+  const containers = await getContainers();
+  const yardStats = stats.map((stat) =>
+    stat.label === "Listings online"
+      ? { ...stat, value: containers.length }
+      : stat,
+  );
+
   return (
     <section className="relative overflow-hidden border-y border-bone/10 bg-steel py-20 sm:py-28">
       <div className="ribs absolute inset-0 opacity-70" aria-hidden="true" />
@@ -53,14 +61,14 @@ export function WhyVal() {
                 <br className="hidden sm:block" /> yards skip.
               </>
             }
-            description="A container is a simple product. The difference is what comes with it: documentation, honest grading and a delivery plan that survives the gate."
+            description="A container is a simple product. The difference is what comes with it: current photos, clear condition notes and a delivery plan that survives the gate."
           />
         </Reveal>
 
         <div className="mt-12 grid gap-10 lg:grid-cols-12 lg:gap-12">
           <div className="lg:col-span-5">
             <div className="grid grid-cols-2 gap-px border border-bone/12 bg-bone/12">
-              {stats.map((stat) => (
+              {yardStats.map((stat) => (
                 <div key={stat.label} className="bg-steel p-5">
                   <p className="font-display text-[38px] font-semibold leading-none tracking-[-0.04em] text-bone">
                     <Counter value={stat.value} suffix={stat.suffix} />

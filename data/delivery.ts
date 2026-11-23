@@ -15,7 +15,7 @@ export const deliveryRegions: DeliveryRegion[] = [
     id: "nairobi",
     name: "Nairobi & Kiambu",
     towns: "Nairobi, Ruiru, Thika, Kikuyu, Ngong",
-    timeline: "Same day – next day",
+    timeline: "1 day; confirmed on booking",
     from20: 15000,
     from40hc: 25000,
     note: "Yard collection available. Crane offload arranged with the delivery.",

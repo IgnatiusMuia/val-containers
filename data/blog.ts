@@ -22,8 +22,8 @@ export interface BlogPost {
   content: BlogBlock[];
 }
 
-const img = (id: string, alt: string) => ({
-  src: `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1600&q=80`,
+const img = (file: string, alt: string) => ({
+  src: `/media/images/${file}`,
   alt,
 });
 
@@ -38,7 +38,7 @@ export const blogPosts: BlogPost[] = [
     category: "Buying guide",
     date: "2026-11-04",
     readMinutes: 9,
-    image: img("1573030889348-c6b0f8b15e40", "Stacked shipping containers at a yard under a blue sky"),
+    image: img("yard/container-stack-high-cube.jpg", "Stacked high cube shipping containers at the yard"),
     featured: true,
     related: [
       "container-delivery-costs-kenya",
@@ -49,6 +49,11 @@ export const blogPosts: BlogPost[] = [
       {
         type: "p",
         text: "Container prices in Kenya move for reasons that have little to do with the container itself. Global freight rates, the shilling, port congestion and the condition of the individual unit all change what a yard can sell for. This guide gives you realistic 2026 ranges, explains what separates a cheap unit from an expensive one, and shows you where the hidden costs usually sit.",
+      },
+      {
+        type: "callout",
+        title: "Indicative figures — confirm current pricing",
+        text: "The ranges below are a planning reference, not a quotation. Stock, condition and freight rates move. Confirm the exact unit price on its listing or with the yard before paying.",
       },
       {
         type: "callout",
@@ -116,14 +121,14 @@ export const blogPosts: BlogPost[] = [
       {
         type: "ul",
         items: [
-          "Does the price include the CSC plate and a condition report?",
+          "Does the price include the CSC plate and condition notes where available?",
           "Is delivery included, and is crane offload included in that figure?",
           "What is the exact container grade — WWT, cargo worthy or one-trip?",
           "Are there photos of the actual unit, including the doors and floor?",
           "Is the serial number recorded on the invoice?",
           "For fabrication, is the scope room-by-room and are electricals included?",
           "What is the lead time, and what happens if the delivery date slips?",
-          "Are payment terms and receipts documented?",
+          "Are payment terms and receipts in writing?",
         ],
       },
       { type: "h2", text: "A realistic budget example" },
@@ -148,7 +153,7 @@ export const blogPosts: BlogPost[] = [
     category: "Comparison",
     date: "2026-10-21",
     readMinutes: 7,
-    image: img("1523351964962-1ee5847816c3", "Modern container home with glass doors over water"),
+    image: img("homes/container-home-exterior.jpg", "Container home exterior with a timber veranda"),
     featured: false,
     related: [
       "shipping-container-price-guide-kenya-2026",
@@ -247,7 +252,7 @@ export const blogPosts: BlogPost[] = [
     category: "Logistics",
     date: "2026-09-30",
     readMinutes: 6,
-    image: img("1504917595217-d4dc5ebe6122", "Truck carrying cargo on a mountain road"),
+    image: img("delivery/mobile-unit-truck.jpg", "Patterned container unit loaded on a truck at the yard"),
     featured: false,
     related: [
       "shipping-container-price-guide-kenya-2026",
@@ -258,6 +263,11 @@ export const blogPosts: BlogPost[] = [
       {
         type: "p",
         text: "Two buyers can purchase identical containers and pay very different delivery costs. The difference is rarely the container. It is the route, the truck, the crane and whether the plot can be reached without a fight. Understanding the components helps you compare quotes fairly.",
+      },
+      {
+        type: "callout",
+        title: "Indicative routes — confirm before booking",
+        text: "The delivery figures below are planning estimates from the Nairobi yard. Access, crane reach, waiting time and fuel can change the final quote. Request a written figure for your site before booking.",
       },
       { type: "h2", text: "What is inside a delivery quote" },
       {
@@ -279,7 +289,7 @@ export const blogPosts: BlogPost[] = [
         type: "table",
         head: ["Route", "Typical delivery time", "Indicative 20ft", "Indicative 40ft HC"],
         rows: [
-          ["Nairobi & Kiambu", "Same day – next day", "from KES 15,000", "from KES 25,000"],
+          ["Nairobi & Kiambu", "1 day; confirm on booking", "from KES 15,000", "from KES 25,000"],
           ["Machakos / Kajiado", "1 day", "from KES 20,000", "from KES 30,000"],
           ["Nakuru / Rift Valley", "2–3 days", "from KES 35,000", "from KES 55,000"],
           ["Mombasa / Coast", "2–3 days", "from KES 45,000", "from KES 65,000"],
@@ -347,7 +357,7 @@ export const blogPosts: BlogPost[] = [
     category: "Build guide",
     date: "2026-09-12",
     readMinutes: 7,
-    image: img("1696454595486-bdb174df034e", "Fabricated container office with glazing and a walkway"),
+    image: img("interiors/office-interior.jpg", "Finished container office interior with glass doors and timber floor"),
     featured: false,
     related: [
       "container-homes-vs-site-offices-kenya",

@@ -1,12 +1,18 @@
 import type { MetadataRoute } from "next";
 import { site } from "@/data/site";
-import { containers } from "@/data/containers";
+import { getContainers } from "@/lib/containers/repository";
 import { useCases } from "@/data/use-cases";
 import { blogPosts } from "@/data/blog";
 
-const lastModified = new Date("2026-11-10");
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const containers = await getContainers();
+  const lastModified = new Date(
+    Math.max(
+      ...containers.map((container) => new Date(container.addedAt).getTime()),
+      ...blogPosts.map((post) => new Date(post.date).getTime()),
+    ),
+  );
 
-export default function sitemap(): MetadataRoute.Sitemap {
   const staticPages = [
     { path: "", priority: 1, changeFrequency: "weekly" as const },
     { path: "/containers", priority: 0.9, changeFrequency: "daily" as const },

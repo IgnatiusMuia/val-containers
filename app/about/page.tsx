@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { site } from "@/data/site";
-import { testimonials } from "@/data/testimonials";
 import { breadcrumbSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
@@ -11,7 +10,7 @@ import { CtaBand } from "@/components/home/CtaBand";
 
 const title = "About Val Containers — Nairobi Container Yard";
 const description =
-  "Val Containers sells documented new, used, fabricated and refrigerated shipping containers from Nairobi. Published prices, written condition reports and countrywide delivery.";
+  "Val Containers sells new, used, fabricated and refrigerated shipping containers from Nairobi. Published prices, condition notes and countrywide delivery.";
 
 export const metadata: Metadata = {
   title,
@@ -38,8 +37,8 @@ const principles = [
     body: "The number on the listing is the starting number in the conversation. If the price changes, the listing changes.",
   },
   {
-    title: "Documented units",
-    body: "Every container has a grade, photos, serial verification and a condition report. No mystery boxes.",
+    title: "Clear listings",
+    body: "Every container has a grade, photos and condition notes. Ask for the serial, CSC plate and current inspection sheet for the exact unit.",
   },
   {
     title: "Inspection first",
@@ -84,14 +83,14 @@ export default function AboutPage() {
               </h1>
               <p className="mt-7 max-w-xl text-[14px] leading-relaxed text-bone/55 sm:text-[15px]">
                 We are a Nairobi container yard that sells the way we would want
-                to buy: clear prices, documented units and a person who answers
+                to buy: clear prices, honest listings and a person who answers
                 the phone. No imported mystique, no surprise invoices.
               </p>
             </div>
             <div className="lg:col-span-4">
               <div className="grid grid-cols-2 gap-px border border-bone/12 bg-bone/12">
                 {[
-                  ["12", "Documented units"],
+                  ["12", "Listings online"],
                   ["9", "Delivery regions"],
                   ["24/7", "Yard access"],
                   ["1", "Written quote"],
@@ -130,10 +129,11 @@ export default function AboutPage() {
                   have never met.
                 </p>
                 <p>
-                  Val runs the other way. We photograph the actual container,
-                  state the grade, record the serial and write the condition
-                  down. The yard is open around the clock because the best way to
-                  buy steel is to stand next to it.
+                  Val runs the other way. We photograph the yard examples, state
+                  the grade and write the condition notes down. For the exact
+                  unit, we share current photos and serial details before
+                  payment. The yard is open around the clock because the best way
+                  to buy steel is to stand next to it.
                 </p>
                 <p>
                   We are not the cheapest yard in Nairobi. We are the one that
@@ -142,21 +142,22 @@ export default function AboutPage() {
                 </p>
               </div>
 
-              <figure className="mt-8 border-l-2 border-ember pl-5">
-                <blockquote className="font-display text-[20px] font-medium leading-snug tracking-[-0.02em] text-ink">
-                  &ldquo;{testimonials[0].quote}&rdquo;
-                </blockquote>
-                <figcaption className="mt-3 font-mono text-[9px] uppercase tracking-[0.12em] text-ink/40">
-                  {testimonials[0].name} · {testimonials[0].location}
-                </figcaption>
-              </figure>
+              <div className="mt-8 border-l-2 border-ember pl-5">
+                <p className="font-display text-[20px] font-medium leading-snug tracking-[-0.02em] text-ink">
+                  Ask for current photos, the serial and the inspection sheet for
+                  the exact unit before you pay.
+                </p>
+                <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.12em] text-ink/40">
+                  The yard rule
+                </p>
+              </div>
             </div>
 
             <div className="lg:col-span-5">
               <div className="relative aspect-[4/5] overflow-hidden border border-ink/12">
                 <Image
-                  src="https://images.unsplash.com/photo-1691481486044-04f12d77a92c?auto=format&fit=crop&w=1200&q=80"
-                  alt="Steel shipping container doors with locking bars"
+                  src="/media/images/yard/kiosk-two-storey.jpg"
+                  alt="Two-storey container office structure at the Nairobi yard"
                   fill
                   sizes="(min-width: 1024px) 40vw, 100vw"
                   className="object-cover"

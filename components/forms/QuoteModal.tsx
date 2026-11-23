@@ -8,6 +8,7 @@ import { buttonStyles } from "@/components/ui/Button";
 import { site } from "@/data/site";
 import { cn } from "@/lib/format";
 import { quoteMessage, waLink } from "@/lib/whatsapp";
+import { saveLeadAction } from "@/lib/actions/leads";
 import { useQuote } from "./QuoteProvider";
 
 const STORAGE_KEY = "vc-quote-nudge";
@@ -164,6 +165,7 @@ export function QuoteModal() {
   const triggered = useRef(false);
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [values, setValues] = useState<Values>(initialValues);
 
   const update = (key: keyof Values, value: string) => {
@@ -301,10 +303,41 @@ export function QuoteModal() {
     setStep((current) => Math.min(3, current + 1));
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!stepValid) return;
-    window.open(link, "_blank", "noopener,noreferrer");
+    if (!stepValid || saving) return;
+
+    const popup = window.open("about:blank", "_blank");
+    if (popup) popup.opener = null;
+
+    setSaving(true);
+    try {
+      await saveLeadAction({
+        name: values.name.trim(),
+        phone: values.phone.trim(),
+        message: values.notes.trim(),
+        interest: values.useCase,
+        source: "quote-modal",
+        pagePath: window.location.pathname,
+        metadata: {
+          type: values.type,
+          size: values.size,
+          condition: values.condition,
+          timeline: values.timeline,
+          location: values.location.trim(),
+        },
+      });
+    } catch {
+      // WhatsApp still opens if the database is unavailable.
+    }
+    setSaving(false);
+
+    if (popup) {
+      popup.location.href = link;
+    } else {
+      window.open(link, "_blank", "noopener,noreferrer");
+    }
+
     setSubmitted(true);
   };
 
@@ -662,7 +695,7 @@ export function QuoteModal() {
                     ) : (
                       <button
                         type="submit"
-                        disabled={!stepValid}
+                        disabled={!stepValid || saving}
                         className={buttonStyles({
                           variant: "primary",
                           size: "md",
@@ -670,7 +703,7 @@ export function QuoteModal() {
                         })}
                       >
                         <Icon name="whatsapp" className="h-4 w-4" />
-                        Send on WhatsApp
+                        {saving ? "Saving…" : "Send on WhatsApp"}
                       </button>
                     )}
                   </div>

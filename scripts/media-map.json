@@ -1,0 +1,117 @@
+{
+  "sourceDir": "/Users/ignatiusmbitimuia/Desktop/Vallery",
+  "placeholder": {
+    "output": "photo-coming-soon.jpg",
+    "width": 1600,
+    "height": 1200
+  },
+  "video": {
+    "source": "telegram-cloud-document-4-5769348857691382517.mp4",
+    "output": "videos/hero-yard.mp4"
+  },
+  "images": [
+    {
+      "source": "photo_2026-11-22 04.25.19.jpeg",
+      "output": "hero-poster.jpg",
+      "alt": "Row of black container kiosks in the Nairobi yard",
+      "width": 2400,
+      "height": 1350,
+      "fit": "cover"
+    },
+    {
+      "source": "photo_2026-11-22 04.25.02.jpeg",
+      "output": "yard/kiosk-row-red.jpg",
+      "alt": "Red container retail kiosks with white roller shutters in the yard"
+    },
+    {
+      "source": "photo_2026-11-22 04.25.16.jpeg",
+      "output": "yard/kiosk-shell-orange.jpg",
+      "alt": "Orange and black container shell before fit-out"
+    },
+    {
+      "source": "photo_2026-11-22 04.25.19.jpeg",
+      "output": "yard/kiosk-row-black.jpg",
+      "alt": "Row of black container kiosks with roller shutters"
+    },
+    {
+      "source": "photo_2026-11-22 04.25.23.jpeg",
+      "output": "yard/kiosk-two-storey.jpg",
+      "alt": "Two-storey container office structure with grey cladding"
+    },
+    {
+      "source": "photo_2026-11-22 04.25.26.jpeg",
+      "output": "yard/kiosk-row-grey.jpg",
+      "alt": "Grey container kiosks with roller shutters, side view"
+    },
+    {
+      "source": "photo_2026-11-22 04.25.37.jpeg",
+      "output": "yard/kiosk-row-green.jpg",
+      "alt": "Green container kiosks lined up in the yard"
+    },
+    {
+      "source": "photo_2026-11-22 04.25.40.jpeg",
+      "output": "yard/container-stack.jpg",
+      "alt": "Stacked used shipping containers in the yard"
+    },
+    {
+      "source": "photo_2026-11-22 04.25.44.jpeg",
+      "output": "yard/container-stack-high-cube.jpg",
+      "alt": "Stacked yellow and red high cube containers"
+    },
+    {
+      "source": "photo_2026-11-22 04.25.47.jpeg",
+      "output": "yard/kiosk-row-orange.jpg",
+      "alt": "Orange and black container kiosks with roller shutters"
+    },
+    {
+      "source": "photo_2026-11-22 04.25.50.jpeg",
+      "output": "interiors/office-interior.jpg",
+      "alt": "Finished container office interior with glass doors and timber floor"
+    },
+    {
+      "source": "photo_2026-11-22 04.25.56.jpeg",
+      "output": "homes/container-home-exterior.jpg",
+      "alt": "Container home exterior with a timber veranda"
+    },
+    {
+      "source": "photo_2026-11-22 04.25.59.jpeg",
+      "output": "interiors/container-home-kitchen.jpg",
+      "alt": "Container home kitchen with cabinets and tiled walls"
+    },
+    {
+      "source": "photo_2026-11-22 16.51.57.jpeg",
+      "output": "yard/kiosk-row-blue.jpg",
+      "alt": "Blue container kiosks with roller shutters"
+    },
+    {
+      "source": "photo_2026-11-22 16.52.25.jpeg",
+      "output": "yard/container-20ft-red.jpg",
+      "alt": "Red 20ft shipping container on the ground at the yard"
+    },
+    {
+      "source": "photo_2026-11-22 16.52.28.jpeg",
+      "output": "delivery/container-on-truck.jpg",
+      "alt": "Shipping container loaded on a flatbed truck"
+    },
+    {
+      "source": "photo_2026-11-22 16.52.38.jpeg",
+      "output": "delivery/mobile-unit-truck.jpg",
+      "alt": "Patterned container unit loaded on a truck"
+    },
+    {
+      "source": "photo_2026-11-22 16.52.41.jpeg",
+      "output": "yard/kiosk-row-patterned.jpg",
+      "alt": "Green, white and yellow container kiosks"
+    }
+  ],
+  "excluded": [
+    {
+      "source": "photo_2026-11-22 04.25.53.jpeg",
+      "reason": "KerGen branded generator enclosure; exclude until permission is confirmed"
+    },
+    {
+      "source": "photo_2026-11-22 04.26.02.jpeg",
+      "reason": "DEFNS branded office; exclude until permission is confirmed"
+    }
+  ]
+}

@@ -1,9 +1,21 @@
 import { site } from "@/data/site";
-import type { Container } from "@/data/containers";
+import { containerImageUrls, type Container } from "@/data/containers";
 import type { Faq } from "@/data/faqs";
 import type { BlogPost } from "@/data/blog";
 
 const businessId = `${site.url}/#business`;
+
+function absoluteMediaUrl(src: string) {
+  if (!src) return "";
+  if (/^https?:\/\//i.test(src)) return src;
+  return `${site.url}${src.startsWith("/") ? src : `/${src}`}`;
+}
+
+function schemaAvailability(status?: Container["status"]) {
+  if (status === "sold") return "https://schema.org/SoldOut";
+  if (status === "available") return "https://schema.org/InStock";
+  return "https://schema.org/LimitedAvailability";
+}
 
 export function localBusinessSchema() {
   return {
@@ -72,7 +84,7 @@ export function productSchema(container: Container) {
     "@type": "Product",
     name: container.name,
     description: container.description,
-    image: container.images.map((image) => image.src),
+    image: containerImageUrls(container).map(absoluteMediaUrl).filter(Boolean),
     sku: `VC-${container.slug.toUpperCase()}`,
     brand: {
       "@type": "Brand",
@@ -89,7 +101,7 @@ export function productSchema(container: Container) {
       url: `${site.url}/containers/${container.slug}`,
       priceCurrency: "KES",
       price: container.price,
-      availability: "https://schema.org/InStock",
+      availability: schemaAvailability(container.status),
       itemCondition:
         container.condition === "new"
           ? "https://schema.org/NewCondition"
@@ -141,7 +153,7 @@ export function articleSchema(post: BlogPost) {
     "@type": "Article",
     headline: post.title,
     description: post.description,
-    image: [post.image.src],
+    image: [absoluteMediaUrl(post.image.src)].filter(Boolean),
     datePublished: post.date,
     dateModified: post.date,
     author: {

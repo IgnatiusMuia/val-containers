@@ -7,8 +7,8 @@ import { CtaBand } from "@/components/home/CtaBand";
 import { FeaturedFleet } from "@/components/home/FeaturedFleet";
 import { HomeFaq } from "@/components/home/HomeFaq";
 import { HomeHero } from "@/components/home/HomeHero";
+import { RecentWork } from "@/components/home/RecentWork";
 import { SizeTeaser } from "@/components/home/SizeTeaser";
-import { Testimonials } from "@/components/home/Testimonials";
 import { TrustMarquee } from "@/components/home/TrustMarquee";
 import { UseCaseGrid } from "@/components/home/UseCaseGrid";
 import { WhyVal } from "@/components/home/WhyVal";
@@ -44,7 +44,7 @@ export default function HomePage() {
       <UseCaseGrid />
       <WhyVal />
       <SizeTeaser />
-      <Testimonials />
+      <RecentWork />
       <HomeFaq />
       <CtaBand />
     </>

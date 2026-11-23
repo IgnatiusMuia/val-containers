@@ -55,9 +55,9 @@ export function EnquiryPanel({ container }: { container: Container }) {
             Ex-yard Nairobi · Delivery quoted separately
           </p>
         </div>
-        <span className="flex items-center gap-1.5 pb-1 font-mono text-[9px] uppercase tracking-[0.1em] text-whatsapp">
-          <span className="h-1.5 w-1.5 rounded-full bg-whatsapp" />
-          {container.stock} in stock
+        <span className="flex items-center gap-1.5 pb-1 font-mono text-[9px] uppercase tracking-[0.1em] text-bone/40">
+          <span className="h-1.5 w-1.5 rounded-full bg-bone/30" />
+          Availability on request
         </span>
       </div>
 
@@ -111,7 +111,7 @@ export function EnquiryPanel({ container }: { container: Container }) {
         <div className="flex items-center justify-between gap-3 p-3">
           <span className="flex items-center gap-2 text-[10.5px] text-bone/40">
             <Icon name="shield" className="h-3.5 w-3.5 text-ember" />
-            Condition report included
+            Condition notes available
           </span>
           <a
             href="/delivery"

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { containers } from "@/data/containers";
+import { getContainers } from "@/lib/containers/repository";
 import { site } from "@/data/site";
 import { breadcrumbSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -9,7 +9,7 @@ import { Catalog } from "@/components/containers/Catalog";
 
 const title = "Shipping Containers for Sale in Kenya — Prices & Stock";
 const description =
-  "Browse 12 documented shipping containers for sale in Kenya. Plain, fabricated and refrigerated units with published KES prices, condition reports and countrywide delivery from Nairobi.";
+  "Browse shipping container listings for sale in Kenya. Plain, fabricated and refrigerated units with published KES prices, condition notes and countrywide delivery from Nairobi.";
 
 export const metadata: Metadata = {
   title,
@@ -30,30 +30,37 @@ export const metadata: Metadata = {
   },
 };
 
-const counts = [
-  { label: "Plain / dry", value: containers.filter((c) => c.type === "plain").length },
-  {
-    label: "Fabricated",
-    value: containers.filter((c) => c.type === "fabricated").length,
-  },
-  {
-    label: "Refrigerated",
-    value: containers.filter((c) => c.type === "refrigerated").length,
-  },
-];
+function catalogCounts(containers: Awaited<ReturnType<typeof getContainers>>) {
+  return [
+    {
+      label: "Plain / dry",
+      value: containers.filter((c) => c.type === "plain").length,
+    },
+    {
+      label: "Fabricated",
+      value: containers.filter((c) => c.type === "fabricated").length,
+    },
+    {
+      label: "Refrigerated",
+      value: containers.filter((c) => c.type === "refrigerated").length,
+    },
+  ];
+}
 
-const itemListSchema = {
-  "@context": "https://schema.org",
-  "@type": "ItemList",
-  name: "Shipping containers for sale in Kenya",
-  numberOfItems: containers.length,
-  itemListElement: containers.map((container, index) => ({
-    "@type": "ListItem",
-    position: index + 1,
-    url: `${site.url}/containers/${container.slug}`,
-    name: container.name,
-  })),
-};
+function itemListSchema(containers: Awaited<ReturnType<typeof getContainers>>) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Shipping containers for sale in Kenya",
+    numberOfItems: containers.length,
+    itemListElement: containers.map((container, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: `${site.url}/containers/${container.slug}`,
+      name: container.name,
+    })),
+  };
+}
 
 function CatalogFallback() {
   return (
@@ -79,7 +86,10 @@ function CatalogFallback() {
   );
 }
 
-export default function ContainersPage() {
+export default async function ContainersPage() {
+  const containers = await getContainers();
+  const counts = catalogCounts(containers);
+
   return (
     <>
       <JsonLd
@@ -88,7 +98,7 @@ export default function ContainersPage() {
             { name: "Home", path: "/" },
             { name: "Containers", path: "/containers" },
           ]),
-          itemListSchema,
+          itemListSchema(containers),
         ]}
       />
 
@@ -111,9 +121,10 @@ export default function ContainersPage() {
             </div>
             <div className="lg:col-span-4 lg:pb-2">
               <p className="max-w-sm text-[13.5px] leading-relaxed text-bone/55">
-                Twelve documented units in the Nairobi yard, from a used 20ft
-                storage box to a finished container home. Filter by what the job
-                actually needs.
+                {containers.length} container listings, from a used 20ft storage
+                box to a finished container home. Filter by what the job
+                actually needs. Confirm current availability and photos before
+                paying.
               </p>
               <dl className="mt-6 grid grid-cols-3 gap-px border border-bone/12 bg-bone/12">
                 {counts.map((count) => (
@@ -128,7 +139,7 @@ export default function ContainersPage() {
                 ))}
               </dl>
               <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.1em] text-bone/30">
-                Prices updated this month · Inspect before you pay
+                Prices and availability change · Confirm before paying
               </p>
             </div>
           </div>
@@ -137,7 +148,7 @@ export default function ContainersPage() {
 
       <div className="pt-8">
         <Suspense fallback={<CatalogFallback />}>
-          <Catalog />
+          <Catalog containers={containers} />
         </Suspense>
       </div>
     </>

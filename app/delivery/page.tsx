@@ -93,8 +93,8 @@ export default function DeliveryPage() {
             <div className="lg:col-span-4">
               <div className="grid grid-cols-2 gap-px border border-bone/12 bg-bone/12">
                 {[
-                  ["Nairobi", "Same / next day"],
-                  ["Upcountry", "1–5 days"],
+                  ["Nairobi", "Confirmed on booking"],
+                  ["Upcountry", "Confirmed on quote"],
                   ["Crane offload", "Arranged"],
                   ["Quote", "Written"],
                 ].map(([label, value]) => (

@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { contactMessage, waLink } from "@/lib/whatsapp";
+import { saveLeadAction } from "@/lib/actions/leads";
 import { Icon } from "@/components/ui/Icons";
 
 const interests = [
@@ -23,13 +24,40 @@ export function ContactForm() {
   const [interest, setInterest] = useState(interests[0]);
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
     const url = waLink(
       contactMessage({ name, phone, email, interest, message }),
     );
-    window.open(url, "_blank", "noopener,noreferrer");
+    const popup = window.open("about:blank", "_blank");
+    if (popup) popup.opener = null;
+
+    setSaving(true);
+    try {
+      await saveLeadAction({
+        name,
+        phone,
+        email,
+        message,
+        interest,
+        source: "contact-page",
+        pagePath: window.location.pathname,
+        website: String(new FormData(event.currentTarget).get("website") ?? ""),
+      });
+    } catch {
+      // WhatsApp still opens if the database is unavailable.
+    }
+    setSaving(false);
+
+    if (popup) {
+      popup.location.href = url;
+    } else {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+
     setSent(true);
   };
 
@@ -149,6 +177,15 @@ export function ContactForm() {
         </div>
       </div>
 
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="hidden"
+      />
+
       <div>
         <label
           htmlFor="contact-message"
@@ -170,10 +207,11 @@ export function ContactForm() {
 
       <button
         type="submit"
-        className="flex h-12 w-full items-center justify-center gap-2 bg-whatsapp text-[13px] font-medium text-white transition-opacity hover:opacity-90"
+        disabled={saving}
+        className="flex h-12 w-full items-center justify-center gap-2 bg-whatsapp text-[13px] font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
       >
         <Icon name="whatsapp" className="h-4 w-4" />
-        Send on WhatsApp
+        {saving ? "Saving…" : "Send on WhatsApp"}
       </button>
       <p className="text-center text-[10px] leading-relaxed text-ink/35">
         This opens WhatsApp with your message ready to send. No account or form

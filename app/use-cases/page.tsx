@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { useCases } from "@/data/use-cases";
 import { site } from "@/data/site";
 import { breadcrumbSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { Reveal } from "@/components/ui/Reveal";
+import { SmartImage } from "@/components/ui/SmartImage";
 import { CtaBand } from "@/components/home/CtaBand";
 import { UseCaseCard } from "@/components/use-cases/UseCaseCard";
 
@@ -76,21 +77,25 @@ export default function UseCasesPage() {
             </div>
             <div className="hidden grid-cols-2 gap-2 lg:col-span-4 sm:grid">
               <div className="relative aspect-[3/4] overflow-hidden border border-bone/10">
-                <Image
+                <SmartImage
                   src={useCases[1].image.src}
                   alt={useCases[1].image.alt}
                   fill
                   sizes="15vw"
+                  wrapperClassName="absolute inset-0"
                   className="object-cover"
+                  fallbackLabel="Use case photo"
                 />
               </div>
               <div className="relative mt-6 aspect-[3/4] overflow-hidden border border-bone/10">
-                <Image
+                <SmartImage
                   src={useCases[5].image.src}
                   alt={useCases[5].image.alt}
                   fill
                   sizes="15vw"
+                  wrapperClassName="absolute inset-0"
                   className="object-cover"
+                  fallbackLabel="Use case photo"
                 />
               </div>
             </div>
@@ -106,9 +111,15 @@ export default function UseCasesPage() {
             </p>
             <p className="text-[11px] text-bone/30">Prices from, ex-yard Nairobi</p>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {useCases.map((useCase) => (
-              <UseCaseCard key={useCase.slug} useCase={useCase} />
+          <div className="columns-1 gap-5 sm:columns-2 lg:columns-3">
+            {useCases.map((useCase, index) => (
+              <Reveal
+                key={useCase.slug}
+                delay={(index % 3) * 0.05}
+                className="mb-5 break-inside-avoid"
+              >
+                <UseCaseCard useCase={useCase} index={index} />
+              </Reveal>
             ))}
           </div>
         </div>

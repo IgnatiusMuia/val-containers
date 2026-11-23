@@ -15,8 +15,8 @@ export interface UseCase {
   related: string[];
 }
 
-const img = (id: string, alt: string) => ({
-  src: `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1600&q=80`,
+const img = (file: string, alt: string) => ({
+  src: `/media/images/${file}`,
   alt,
 });
 
@@ -27,18 +27,18 @@ export const useCases: UseCase[] = [
     shortTitle: "Secure storage",
     eyebrow: "Storage",
     summary:
-      "Lockable, weather-tight steel storage for stock, tools and equipment — delivered to your site and ready the same day.",
+      "Lockable, weather-tight steel storage for stock, tools and equipment — delivered after stock and site access are confirmed.",
     intro:
       "A shipping container is the simplest secure room you can buy. It arrives finished, locks properly, and can be moved when the lease ends. For retailers holding stock, contractors protecting tools, or farms storing inputs, it removes the cost and delay of building a store.",
-    image: img("1573030889348-c6b0f8b15e40", "Stacked shipping containers used for secure storage under a blue sky"),
+    image: img("yard/container-stack.jpg", "Stacked used shipping containers at the Nairobi yard"),
     gallery: [
-      img("1696324535687-6bb987f50e96", "Steel storage container with locking doors"),
-      img("1553413077-190dd305871c", "Warehouse aisle with pallet racking"),
-      img("1601108122462-8a69128bb3ce", "Container door and locking bars"),
+      img("yard/container-stack-high-cube.jpg", "Stacked high cube containers at the yard"),
+      img("delivery/container-on-truck.jpg", "Container loaded on a flatbed truck for delivery"),
+      img("yard/container-20ft-red.jpg", "Red 20ft shipping container on the ground at the yard"),
     ],
     sizes: ["20ft", "40ft", "40ft HC"],
     fromPrice: 185000,
-    timeline: "Same-day delivery within Nairobi for units in stock",
+    timeline: "Delivery scheduled after stock and site access are confirmed",
     features: [
       {
         title: "One lock, one room",
@@ -75,14 +75,14 @@ export const useCases: UseCase[] = [
     shortTitle: "Site offices",
     eyebrow: "Site offices",
     summary:
-      "Insulated, wired and lockable offices delivered to site in days, not months. Move them to the next project when you are done.",
+      "Insulated, wired and lockable offices built for site work, then moved to the next project when the job is done.",
     intro:
       "A container office gives a project team a proper base from week one. Windows, lighting, power and a steel door are installed before delivery, so your team can start work the day the crane sets it down. When the project ends, the office moves.",
-    image: img("1696454595486-bdb174df034e", "Fabricated container office with glazing and a steel walkway"),
+    image: img("interiors/office-interior.jpg", "Finished container office interior with glass doors and timber floor"),
     gallery: [
-      img("1497366216548-37526070297c", "Insulated office interior with desk and lighting"),
-      img("1497366811353-6870744d04b2", "Glass meeting room in a modern office"),
-      img("1713950653257-33abeea82b40", "Container door specification plate"),
+      img("yard/kiosk-two-storey.jpg", "Two-storey container office structure with grey cladding"),
+      img("yard/kiosk-shell-orange.jpg", "Orange and black container shell before office fit-out"),
+      img("yard/kiosk-row-orange.jpg", "Orange container office units with roller shutters"),
     ],
     sizes: ["20ft", "40ft"],
     fromPrice: 595000,
@@ -126,11 +126,10 @@ export const useCases: UseCase[] = [
       "A high cube shell gives you a fast, predictable home base — insulated, plumbed and finished with the rooms you actually need.",
     intro:
       "A container home is not a shed with a bed in it. Built properly, it is an insulated steel room with real windows, wiring and plumbing, delivered in weeks rather than months. The savings come from the shell and speed; the comfort comes from the fit-out.",
-    image: img("1628394029761-acc83a2a08a6", "Container home with large glazed doors under mature trees"),
+    image: img("homes/container-home-exterior.jpg", "Container home exterior with a timber veranda"),
     gallery: [
-      img("1523351964962-1ee5847816c3", "Modern container home over water with glass doors"),
-      img("1693515184806-c94ead5b8400", "Container home on stilts with a timber deck"),
-      img("1599813674302-e3b2bc05695f", "Compact bedroom interior with timber ceiling"),
+      img("interiors/container-home-kitchen.jpg", "Container home kitchen with cabinets and tiled walls"),
+      img("yard/container-stack-high-cube.jpg", "High cube containers used as the base for conversions"),
     ],
     sizes: ["40ft HC"],
     fromPrice: 820000,
@@ -174,11 +173,11 @@ export const useCases: UseCase[] = [
       "A lockable, brandable shop with a serving counter and roller shutter — placed on your plot and open for business.",
     intro:
       "A container kiosk is a shop, store room and security box in one. It can be branded on three elevations, fitted with a serving counter and secured with a steel roller shutter. For a roadside trader or a brand testing a new location, it is a low-risk way to start.",
-    image: img("1764344815220-2cbf59c95f46", "Container retail unit with a mural and outdoor seating"),
+    image: img("yard/kiosk-row-red.jpg", "Red container retail kiosks with white roller shutters"),
     gallery: [
-      img("1529939828339-56039bb75a63", "Container cafe with glazing and an outdoor service area"),
-      img("1691481486044-04f12d77a92c", "Container doors and locking bars"),
-      img("1696324535687-6bb987f50e96", "Steel container doors"),
+      img("yard/kiosk-row-black.jpg", "Black container kiosks with roller shutters"),
+      img("yard/kiosk-row-blue.jpg", "Blue container kiosks with roller shutters"),
+      img("yard/kiosk-row-patterned.jpg", "Patterned container kiosks in green, white and yellow"),
     ],
     sizes: ["20ft"],
     fromPrice: 520000,
@@ -219,30 +218,34 @@ export const useCases: UseCase[] = [
     shortTitle: "Cold storage",
     eyebrow: "Cold storage",
     summary:
-      "Working reefer containers for produce, meat, dairy and flowers — with temperature-tested cooling units and clear power requirements.",
+      "Refrigerated container options for produce, meat, dairy and flowers, with power requirements confirmed before delivery.",
     intro:
       "A refrigerated container is a cold room with wheels. It can sit at a farm, a market or a distribution yard, holding produce at a stable setpoint without building a permanent cold room. The catch is power: most reefers need 3-phase supply.",
-    image: img("1611224097891-83220d09271a", "Refrigerated shipping container with a Carrier cooling unit"),
+    image: img(
+      "photo-coming-soon.jpg",
+      "Cold storage container photos coming soon — ask the yard for current reefer photos",
+    ),
     gallery: [
-      img("1609143739217-01b60dad1c67", "Clean cold storage interior with stacked cartons"),
-      img("1595871685450-d5d2e8847a64", "Insulated refrigerated container at the yard"),
-      img("1713950653257-33abeea82b40", "Container door specification markings"),
+      img(
+        "photo-coming-soon.jpg",
+        "Cold storage container photos coming soon — ask the yard for current reefer photos",
+      ),
     ],
     sizes: ["20ft", "40ft HC"],
     fromPrice: 1250000,
-    timeline: "Available from stock; delivery within 2–3 days",
+    timeline: "Lead time confirmed against current reefer stock",
     features: [
       {
         title: "Deep-freeze to ambient",
         body: "Working units hold setpoints from −30 °C to +25 °C, depending on the model and condition.",
       },
       {
-        title: "Tested before sale",
-        body: "We run the cooling unit across its range and share the test sheet with the condition report.",
+        title: "Test sheet on request",
+        body: "Ask for the current cooling-unit test sheet and power requirements before you commit.",
       },
       {
         title: "Sealed cargo envelope",
-        body: "Insulated panels, door gaskets and an aluminium T-floor are checked for air leaks and drainage.",
+        body: "Insulated panels, door gaskets and an aluminium T-floor are part of the inspection. Ask for current notes on the exact unit.",
       },
     ],
     considerations: [
@@ -270,15 +273,15 @@ export const useCases: UseCase[] = [
       "Stackable, brandable containers for bars, activations, ticket desks and event back-of-house — installed and removed without a build.",
     intro:
       "Event organisers use containers because they arrive complete, look intentional and leave without a demolition crew. A single 20ft unit can be a bar or ticket desk; stacked units create a two-storey activation. Branding turns the corrugation into part of the design.",
-    image: img("1603803325392-7c58cb452a3c", "Colourful stacked containers used as an event structure"),
+    image: img("yard/kiosk-row-patterned.jpg", "Patterned container kiosks in green, white and yellow"),
     gallery: [
-      img("1764344815220-2cbf59c95f46", "Container bar with outdoor seating"),
-      img("1529939828339-56039bb75a63", "Container cafe unit with service windows"),
-      img("1767884163408-fc4fc6b2c0a0", "Colourful stacked containers"),
+      img("yard/kiosk-two-storey.jpg", "Two-storey container structure with grey cladding"),
+      img("yard/kiosk-row-orange.jpg", "Orange container kiosks with roller shutters"),
+      img("yard/kiosk-row-blue.jpg", "Blue container kiosks with roller shutters"),
     ],
     sizes: ["20ft", "40ft"],
     fromPrice: 520000,
-    timeline: "2–4 weeks fabrication; short-term hire on request",
+    timeline: "2–4 weeks fabrication; event timelines confirmed on enquiry",
     features: [
       {
         title: "Brand-first surfaces",
