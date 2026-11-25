@@ -15,6 +15,8 @@ const title = "Container Buying Guides & Notes from the Yard";
 const description =
   "Practical guides to shipping container prices, delivery, fabrication and container homes in Kenya — written from the yard, not a content farm.";
 
+const latestGuideDate = blogPosts[0]?.date ?? "2026-01-01";
+
 export const metadata: Metadata = {
   title,
   description,
@@ -119,7 +121,11 @@ export default function BlogPage() {
               More from the yard
             </p>
             <p className="text-[11px] text-bone/25">
-              {blogPosts.length} guides · Updated November 2026
+              {blogPosts.length} guides · Updated{" "}
+              {new Intl.DateTimeFormat("en-KE", {
+                month: "long",
+                year: "numeric",
+              }).format(new Date(latestGuideDate))}
             </p>
           </div>
 

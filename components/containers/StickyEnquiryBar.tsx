@@ -10,11 +10,15 @@ export function StickyEnquiryBar({
   price,
   whatsappMessage,
   source,
+  containerSlug,
+  whatsappNumber,
 }: {
   name: string;
   price: number;
   whatsappMessage: string;
   source: string;
+  containerSlug?: string;
+  whatsappNumber?: string;
 }) {
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-bone/12 bg-ink/95 backdrop-blur-xl md:hidden">
@@ -26,11 +30,11 @@ export function StickyEnquiryBar({
           </p>
         </div>
         <a
-          href={waLink(whatsappMessage)}
+          href={waLink(whatsappMessage, whatsappNumber)}
           target="_blank"
           rel="noopener noreferrer"
           aria-label={`WhatsApp about ${name}`}
-          className="flex h-11 items-center gap-1.5 bg-whatsapp px-3 text-[11.5px] font-medium text-white"
+          className="flex h-11 items-center gap-1.5 bg-whatsapp px-3 text-[11.5px] font-medium text-ink"
         >
           <Icon name="whatsapp" className="h-4 w-4" />
           WhatsApp
@@ -38,6 +42,7 @@ export function StickyEnquiryBar({
         <QuoteButton
           size="sm"
           source={source}
+          container={containerSlug}
           icon={false}
           className="h-11 px-3"
         >

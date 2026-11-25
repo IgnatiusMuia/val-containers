@@ -112,11 +112,14 @@ function customerWhatsApp(phone: string, reference: string, name: string) {
 
 export default async function EnquiryDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { user } = await requireAdmin("enquiries");
   const { id } = await params;
+  const { error: actionError } = await searchParams;
 
   const supabase = await createSupabaseServerClient();
   if (!supabase) notFound();
@@ -183,6 +186,15 @@ export default async function EnquiryDetailPage({
         ← Enquiries
       </Link>
 
+      {actionError ? (
+        <p
+          role="alert"
+          className="mt-4 border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200"
+        >
+          That update did not save. Check the details and try again.
+        </p>
+      ) : null}
+
       <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-2">
@@ -214,7 +226,7 @@ export default async function EnquiryDetailPage({
             )}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex h-9 items-center gap-2 bg-whatsapp px-3 font-mono text-[9px] uppercase tracking-[0.12em] text-white"
+            className="inline-flex h-9 items-center gap-2 bg-whatsapp px-3 font-mono text-[9px] uppercase tracking-[0.12em] text-ink"
           >
             <Icon name="whatsapp" className="h-3.5 w-3.5" />
             WhatsApp

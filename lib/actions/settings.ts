@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath, updateTag } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireOwner } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -24,19 +25,25 @@ function revalidateSettings() {
 export async function updateSiteSettingsAction(formData: FormData) {
   await requireOwner();
 
+  const siteName = text(formData, "siteName");
+  const email = text(formData, "email");
+  if (!siteName || !email) {
+    redirect("/admin/settings?error=required");
+  }
+
   const supabase = await createSupabaseServerClient();
-  if (!supabase) return;
+  if (!supabase) redirect("/admin/settings?error=config");
 
   const { error } = await supabase
     .from("site_settings")
     .update({
-      site_name: text(formData, "siteName"),
+      site_name: siteName,
       tagline: text(formData, "tagline"),
       description: text(formData, "description"),
-      email: text(formData, "email"),
+      email,
       phone_display: text(formData, "phoneDisplay"),
       phone_href: text(formData, "phoneHref"),
-      whatsapp_number: text(formData, "whatsappNumber"),
+      whatsapp_number: text(formData, "whatsappNumber").replace(/\D/g, ""),
       address_line: text(formData, "addressLine"),
       address: text(formData, "address"),
       city: text(formData, "city"),
@@ -50,10 +57,11 @@ export async function updateSiteSettingsAction(formData: FormData) {
 
   if (error) {
     console.error("Could not update site settings:", error.message);
-    return;
+    redirect("/admin/settings?error=settings");
   }
 
   revalidateSettings();
+  redirect("/admin/settings?saved=settings");
 }
 
 export async function saveAnnouncementAction(formData: FormData) {
@@ -61,10 +69,12 @@ export async function saveAnnouncementAction(formData: FormData) {
 
   const id = text(formData, "id");
   const message = text(formData, "message");
-  if (!message) return;
+  if (!message) {
+    redirect("/admin/settings?error=message");
+  }
 
   const supabase = await createSupabaseServerClient();
-  if (!supabase) return;
+  if (!supabase) redirect("/admin/settings?error=config");
 
   const payload = {
     message,
@@ -80,19 +90,31 @@ export async function saveAnnouncementAction(formData: FormData) {
 
   if (error) {
     console.error("Could not save announcement:", error.message);
-    return;
+    redirect("/admin/settings?error=announcement");
   }
 
   revalidateSettings();
+  redirect(`/admin/settings?saved=announcement${id ? `&edit=${id}` : ""}`);
 }
 
 export async function deleteAnnouncementAction(formData: FormData) {
   await requireOwner();
   const id = text(formData, "id");
-  if (!id) return;
+  if (!id) redirect("/admin/settings?error=missing");
 
   const supabase = await createSupabaseServerClient();
-  if (!supabase) return;
-  await supabase.from("announcements").delete().eq("id", id);
+  if (!supabase) redirect("/admin/settings?error=config");
+
+  const { error } = await supabase
+    .from("announcements")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error("Could not delete announcement:", error.message);
+    redirect("/admin/settings?error=announcement");
+  }
+
   revalidateSettings();
+  redirect("/admin/settings?saved=deleted");
 }

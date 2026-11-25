@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { requireAdmin } from "@/lib/auth";
+import type { AdminPermission } from "@/lib/permissions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { formatKES } from "@/lib/format";
 import { Icon } from "@/components/ui/Icons";
@@ -49,10 +51,17 @@ export default async function AdminOverviewPage({
 }: {
   searchParams: Promise<{ error?: string; reset?: string }>;
 }) {
-  const [{ error, reset }, supabase] = await Promise.all([
+  const [{ error, reset }, supabase, { account }] = await Promise.all([
     searchParams,
     createSupabaseServerClient(),
+    requireAdmin(),
   ]);
+  const can = (permission: AdminPermission) =>
+    account.role === "owner" || account.permissions.includes(permission);
+  const canInventory = can("inventory");
+  const canEnquiries = can("enquiries");
+  const canContent = can("content");
+  const canMedia = can("media");
   const notice =
     reset === "1"
       ? "Password updated. You are signed in."
@@ -84,30 +93,40 @@ export default async function AdminOverviewPage({
     mediaCount,
     recentEnquiriesResult,
   ] = await Promise.all([
-    supabase
-      .from("containers")
-      .select(
-        "id, reference, slug, name, status, publication_status, price, stock, updated_at",
-      )
-      .order("updated_at", { ascending: false }),
-    supabase
-      .from("enquiries")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "new"),
-    supabase
-      .from("enquiries")
-      .select("id", { count: "exact", head: true }),
-    supabase
-      .from("site_content_drafts")
-      .select("key", { count: "exact", head: true }),
-    supabase
-      .from("container_media")
-      .select("id", { count: "exact", head: true }),
-    supabase
-      .from("enquiries")
-      .select("id, reference, name, status, created_at")
-      .order("created_at", { ascending: false })
-      .limit(5),
+    canInventory
+      ? supabase
+          .from("containers")
+          .select(
+            "id, reference, slug, name, status, publication_status, price, stock, updated_at",
+          )
+          .order("updated_at", { ascending: false })
+      : Promise.resolve({ data: [] as ContainerRow[], error: null }),
+    canEnquiries
+      ? supabase
+          .from("enquiries")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "new")
+      : Promise.resolve({ count: 0, error: null }),
+    canEnquiries
+      ? supabase.from("enquiries").select("id", { count: "exact", head: true })
+      : Promise.resolve({ count: 0, error: null }),
+    canContent
+      ? supabase
+          .from("site_content_drafts")
+          .select("key", { count: "exact", head: true })
+      : Promise.resolve({ count: 0, error: null }),
+    canMedia
+      ? supabase
+          .from("container_media")
+          .select("id", { count: "exact", head: true })
+      : Promise.resolve({ count: 0, error: null }),
+    canEnquiries
+      ? supabase
+          .from("enquiries")
+          .select("id, reference, name, status, created_at")
+          .order("created_at", { ascending: false })
+          .limit(5)
+      : Promise.resolve({ data: [] as EnquiryRow[], error: null }),
   ]);
 
   if (containersResult.error) {
@@ -139,30 +158,54 @@ export default async function AdminOverviewPage({
   const units = containers.reduce((sum, row) => sum + row.stock, 0);
 
   const stats = [
-    {
-      label: "Published listings",
-      value: published.length,
-      detail: `${containers.length} total records`,
-      href: "/admin/containers",
-    },
-    {
-      label: "Available now",
-      value: available.length,
-      detail: `${units} stock units`,
-      href: "/admin/containers?status=available",
-    },
-    {
-      label: "New enquiries",
-      value: newEnquiries.count ?? 0,
-      detail: `${allEnquiries.count ?? 0} total enquiries`,
-      href: "/admin/enquiries",
-    },
-    {
-      label: "Content drafts",
-      value: contentDrafts.count ?? 0,
-      detail: `${mediaCount.count ?? 0} media files`,
-      href: "/admin/content",
-    },
+    ...(canInventory
+      ? [
+          {
+            label: "Published listings",
+            value: published.length,
+            detail: `${containers.length} total records`,
+            href: "/admin/containers",
+          },
+          {
+            label: "Available now",
+            value: available.length,
+            detail: `${units} stock units`,
+            href: "/admin/containers?status=available",
+          },
+        ]
+      : []),
+    ...(canEnquiries
+      ? [
+          {
+            label: "New enquiries",
+            value: newEnquiries.count ?? 0,
+            detail: `${allEnquiries.count ?? 0} total enquiries`,
+            href: "/admin/enquiries",
+          },
+        ]
+      : []),
+    ...(canContent
+      ? [
+          {
+            label: "Content drafts",
+            value: contentDrafts.count ?? 0,
+            detail: canMedia
+              ? `${mediaCount.count ?? 0} media files`
+              : "Draft content",
+            href: "/admin/content",
+          },
+        ]
+      : []),
+    ...(canMedia && !canContent
+      ? [
+          {
+            label: "Media files",
+            value: mediaCount.count ?? 0,
+            detail: "Photos and videos",
+            href: "/admin/media",
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -184,24 +227,29 @@ export default async function AdminOverviewPage({
           </p>
         </div>
         <div className="flex gap-2">
-          <Link
-            href="/admin/containers/new"
-            className="inline-flex h-10 items-center gap-2 bg-ember px-4 font-mono text-[10px] uppercase tracking-[0.14em] text-ink"
-          >
-            <Icon name="plus" className="h-3.5 w-3.5" />
-            Add container
-          </Link>
-          <Link
-            href="/admin/enquiries"
-            className="inline-flex h-10 items-center gap-2 border border-bone/15 px-4 font-mono text-[10px] uppercase tracking-[0.14em] text-bone/55 transition-colors hover:border-bone/35 hover:text-bone"
-          >
-            Enquiries
-          </Link>
+          {canInventory ? (
+            <Link
+              href="/admin/containers/new"
+              className="inline-flex h-10 items-center gap-2 bg-ember px-4 font-mono text-[10px] uppercase tracking-[0.14em] text-ink"
+            >
+              <Icon name="plus" className="h-3.5 w-3.5" />
+              Add container
+            </Link>
+          ) : null}
+          {canEnquiries ? (
+            <Link
+              href="/admin/enquiries"
+              className="inline-flex h-10 items-center gap-2 border border-bone/15 px-4 font-mono text-[10px] uppercase tracking-[0.14em] text-bone/55 transition-colors hover:border-bone/35 hover:text-bone"
+            >
+              Enquiries
+            </Link>
+          ) : null}
         </div>
       </div>
 
-      <div className="mt-8 grid gap-px border border-bone/12 bg-bone/12 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
+      {stats.length > 0 ? (
+        <div className="mt-8 grid gap-px border border-bone/12 bg-bone/12 sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((stat) => (
           <Link
             key={stat.label}
             href={stat.href}
@@ -221,11 +269,25 @@ export default async function AdminOverviewPage({
               />
             </p>
           </Link>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="mt-8 border border-bone/12 p-6">
+          <p className="text-sm text-bone/55">
+            Your account does not have access to inventory, enquiries or content
+            yet. Ask the owner to update your permissions.
+          </p>
+        </div>
+      )}
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-12">
-        <div className="border border-bone/12 lg:col-span-7">
+      {canInventory || canEnquiries ? (
+        <div className="mt-8 grid gap-6 lg:grid-cols-12">
+          {canInventory ? (
+            <div
+              className={`border border-bone/12 ${
+                canEnquiries ? "lg:col-span-7" : "lg:col-span-12"
+              }`}
+            >
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-bone/12 px-4 py-3">
             <div>
               <h2 className="text-sm font-medium text-bone">Latest inventory</h2>
@@ -299,10 +361,16 @@ export default async function AdminOverviewPage({
               </table>
             </div>
           )}
-        </div>
+            </div>
+          ) : null}
 
-        <div className="border border-bone/12 lg:col-span-5">
-          <div className="flex items-center justify-between gap-3 border-b border-bone/12 px-4 py-3">
+          {canEnquiries ? (
+            <div
+              className={`border border-bone/12 ${
+                canInventory ? "lg:col-span-5" : "lg:col-span-12"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-3 border-b border-bone/12 px-4 py-3">
             <div>
               <h2 className="text-sm font-medium text-bone">Latest enquiries</h2>
               <p className="mt-0.5 font-mono text-[8px] uppercase tracking-[0.16em] text-bone/30">
@@ -352,8 +420,10 @@ export default async function AdminOverviewPage({
               ))}
             </ul>
           )}
+            </div>
+          ) : null}
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }

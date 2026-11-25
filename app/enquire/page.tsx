@@ -11,7 +11,7 @@ import { EnquiryForm } from "@/components/forms/EnquiryForm";
 
 export const instant = false;
 
-const title = "Request a Container Quote — Val Containers";
+const title = "Request a Container Quote";
 const description =
   "Send an enquiry to the Val Containers yard in Nairobi. Choose a container, share delivery details and continue on WhatsApp with a reference number.";
 
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     locale: "en_KE",
     url: "/enquire",
     siteName: site.name,
-    title: `${title} — Val Containers`,
+    title: `${title} — ${site.name}`,
     description,
   },
 };

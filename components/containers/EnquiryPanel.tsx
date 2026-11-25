@@ -71,10 +71,10 @@ export function EnquiryPanel({
 
       <div className="mt-5 flex flex-col gap-2">
         <a
-          href={waLink(message)}
+          href={waLink(message, settings.whatsappNumber)}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex h-12 items-center justify-center gap-2 bg-whatsapp text-[13px] font-medium text-white transition-opacity hover:opacity-90"
+          className="flex h-12 items-center justify-center gap-2 bg-whatsapp text-[13px] font-medium text-ink transition-opacity hover:opacity-90"
         >
           <Icon name="whatsapp" className="h-4 w-4" />
           Ask about this unit on WhatsApp
@@ -83,6 +83,7 @@ export function EnquiryPanel({
           variant="outline"
           size="md"
           source={`detail-${container.slug}`}
+          container={container.slug}
           className="w-full"
         >
           Request a delivered quote

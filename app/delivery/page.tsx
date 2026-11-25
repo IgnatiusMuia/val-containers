@@ -6,7 +6,12 @@ import {
   siteAccessChecks,
 } from "@/data/delivery";
 import { site } from "@/data/site";
-import { contentValue, getFaqs, getSiteContent } from "@/lib/content";
+import {
+  contentValue,
+  getFaqs,
+  getSiteContent,
+  getSiteSettings,
+} from "@/lib/content";
 import { breadcrumbSchema, faqSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
@@ -40,7 +45,11 @@ export const metadata: Metadata = {
 };
 
 export default async function DeliveryPage() {
-  const [content, faqs] = await Promise.all([getSiteContent(), getFaqs()]);
+  const [content, faqs, settings] = await Promise.all([
+    getSiteContent(),
+    getFaqs(),
+    getSiteSettings(),
+  ]);
 
   const deliveryFaqs = faqs.filter((faq) => faq.category === "delivery");
   const heroEyebrow = contentValue(
@@ -66,7 +75,7 @@ export default async function DeliveryPage() {
   const coverageBody = contentValue(
     content,
     "delivery.coverage.body",
-    "Coverage and the final delivery cost are confirmed after the site access check. No fixed delivery price is published until it has been verified.",
+    "Indicative costs are shown below. The final delivery price is confirmed after the site access check, so the number you sign off covers the truck, crane and offload.",
   );
   const accessTitle = contentValue(
     content,
@@ -87,7 +96,7 @@ export default async function DeliveryPage() {
             { name: "Home", path: "/" },
             { name: "Delivery", path: "/delivery" },
           ]),
-          faqSchema(deliveryFaqs),
+          ...(deliveryFaqs.length > 0 ? [faqSchema(deliveryFaqs)] : []),
         ]}
       />
 
@@ -193,11 +202,11 @@ export default async function DeliveryPage() {
               {coverageBody}
             </p>
           </div>
-          <KenyaMap />
+          <KenyaMap whatsappNumber={settings.whatsappNumber} />
         </div>
       </section>
 
-      <section className="border-b border-ink/10 bg-bone-2">
+      <section id="access" className="scroll-mt-24 border-b border-ink/10 bg-bone-2">
         <div className="wrap py-16 sm:py-20">
           <div className="grid gap-10 lg:grid-cols-12">
             <div className="lg:col-span-4">

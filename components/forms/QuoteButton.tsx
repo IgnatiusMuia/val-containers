@@ -12,6 +12,7 @@ export function QuoteButton({
   className,
   source = "cta",
   icon = true,
+  container,
   onOpen,
 }: {
   children?: React.ReactNode;
@@ -20,6 +21,7 @@ export function QuoteButton({
   className?: string;
   source?: string;
   icon?: boolean;
+  container?: string;
   onOpen?: () => void;
 }) {
   const router = useRouter();
@@ -29,7 +31,9 @@ export function QuoteButton({
       type="button"
       onClick={() => {
         onOpen?.();
-        router.push(`/enquire?source=${encodeURIComponent(source)}`);
+        const params = new URLSearchParams({ source });
+        if (container) params.set("container", container);
+        router.push(`/enquire?${params.toString()}`);
       }}
       className={cn(buttonStyles({ variant, size, className }))}
     >

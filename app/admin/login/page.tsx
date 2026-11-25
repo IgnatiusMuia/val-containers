@@ -35,6 +35,13 @@ export default async function AdminLoginPage({
             owner allowlist in Supabase.
           </p>
 
+          {error === "config" ? (
+            <p className="mt-6 border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+              Admin sign-in is not configured. Check the Supabase environment
+              variables and apply the latest database migration.
+            </p>
+          ) : null}
+
           {error === "not-admin" ? (
             <p className="mt-6 border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
               That account is not on the admin allowlist.

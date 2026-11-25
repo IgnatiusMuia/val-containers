@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import { site } from "@/data/site";
 import { contentValue, getSiteContent, getSiteSettings } from "@/lib/content";
-import { breadcrumbSchema, localBusinessSchema } from "@/lib/schema";
+import { breadcrumbSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Icon } from "@/components/ui/Icons";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { QuoteButton } from "@/components/forms/QuoteButton";
 
-const title = "Contact Val Containers — Nairobi Container Yard";
+const title = "Contact — Nairobi Container Yard";
 const description =
-  "Talk to the Val Containers yard in Nairobi. Call or WhatsApp +254 795 506 397, get a quote, or visit near the NTSA Inspection Centre on Likoni Road.";
+  "Talk to the Val Containers yard in Nairobi. Call, WhatsApp, get a quote, or visit near the NTSA Inspection Centre on Likoni Road.";
 
 export const metadata: Metadata = {
   title,
@@ -21,12 +21,12 @@ export const metadata: Metadata = {
     locale: "en_KE",
     url: "/contact",
     siteName: site.name,
-    title: `${title} — Val Containers`,
+    title: `${title} — ${site.name}`,
     description,
   },
   twitter: {
     card: "summary_large_image",
-    title: `${title} — Val Containers`,
+    title: `${title} — ${site.name}`,
     description,
   },
 };
@@ -62,7 +62,6 @@ export default async function ContactPage() {
             { name: "Home", path: "/" },
             { name: "Contact", path: "/contact" },
           ]),
-          localBusinessSchema(settings),
         ]}
       />
 
@@ -126,7 +125,7 @@ export default async function ContactPage() {
         </div>
       </section>
 
-      <section className="bg-bone">
+      <section id="quote" className="scroll-mt-24 bg-bone">
         <div className="wrap py-14 sm:py-20">
           <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
             <div className="lg:col-span-7">

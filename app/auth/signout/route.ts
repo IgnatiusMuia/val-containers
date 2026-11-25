@@ -1,25 +1,21 @@
-import { NextResponse } from "next/server";
-import { ADMIN_ACTIVITY_COOKIE } from "@/lib/auth-constants";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { NextResponse, type NextRequest } from "next/server";
+import {
+  createRouteHandlerSupabaseClient,
+  redirectWithCookies,
+} from "@/lib/supabase/route";
 
-export async function POST(request: Request) {
-  const supabase = await createSupabaseServerClient();
+export async function POST(request: NextRequest) {
+  const loginUrl = new URL("/admin/login", request.url);
+  const client = createRouteHandlerSupabaseClient(request);
 
-  if (supabase) {
-    await supabase.auth.signOut();
+  if (!client) {
+    return NextResponse.redirect(loginUrl, { status: 303 });
   }
 
-  const response = NextResponse.redirect(
-    new URL("/admin/login", request.url),
-    { status: 303 },
-  );
-  response.cookies.set(ADMIN_ACTIVITY_COOKIE, "", {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 0,
-  });
+  await client.supabase.auth.signOut();
 
-  return response;
+  return redirectWithCookies(
+    NextResponse.redirect(loginUrl, { status: 303 }),
+    client.response,
+  );
 }

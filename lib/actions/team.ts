@@ -1,10 +1,10 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireOwner } from "@/lib/auth";
 import { ADMIN_PERMISSIONS, type AdminPermission } from "@/lib/permissions";
+import { canonicalSiteUrl } from "@/lib/site-url";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -35,17 +35,6 @@ function readRole(formData: FormData): "owner" | "admin" {
 
 function isEmail(value: string) {
   return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value);
-}
-
-async function requestOrigin() {
-  const requestHeaders = await headers();
-  const host =
-    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
-  const protocol =
-    requestHeaders.get("x-forwarded-proto") ??
-    (process.env.NODE_ENV === "production" ? "https" : "http");
-  if (!host) return process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  return `${protocol}://${host}`;
 }
 
 async function findUserByEmail(
@@ -88,7 +77,7 @@ export async function inviteTeamMemberAction(formData: FormData) {
   const admin = createSupabaseAdminClient();
   if (!admin) fail("config");
 
-  const origin = await requestOrigin();
+  const origin = canonicalSiteUrl();
   const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
     redirectTo: `${origin}/auth/callback?next=/admin/reset-password`,
     data: displayName ? { display_name: displayName } : undefined,
@@ -125,7 +114,7 @@ export async function inviteTeamMemberAction(formData: FormData) {
 }
 
 export async function grantTeamAccessAction(formData: FormData) {
-  await requireOwner();
+  const { user: actor } = await requireOwner();
 
   const email = text(formData, "email").toLowerCase();
   const displayName = text(formData, "displayName") || null;
@@ -143,6 +132,22 @@ export async function grantTeamAccessAction(formData: FormData) {
     fail("lookup-failed");
   }
   if (!target) fail("no-user");
+
+  const { data: existing, error: existingError } = await admin
+    .from("admin_users")
+    .select("role, active")
+    .eq("user_id", target.id)
+    .maybeSingle();
+
+  if (existingError) fail("lookup-failed");
+  if (target.id === actor.id && role !== "owner") {
+    fail("self-lockout");
+  }
+  const demotingOwner =
+    existing?.role === "owner" && existing.active && role !== "owner";
+  if (demotingOwner && (await ownerCount(target.id)) === 0) {
+    fail("last-owner");
+  }
 
   const { error: allowlistError } = await admin.from("admin_users").upsert(
     {
@@ -186,13 +191,13 @@ export async function updateTeamMemberAction(formData: FormData) {
 
   if (error || !target) fail("missing-user");
 
-  const removingOwner = target.role === "owner" && (role !== "owner" || !active);
-  if (removingOwner && (userId === actor.id || (await ownerCount(userId)) === 0)) {
-    fail("last-owner");
-  }
-
   if (userId === actor.id && (!active || role !== "owner")) {
     fail("self-lockout");
+  }
+
+  const removingOwner = target.role === "owner" && (role !== "owner" || !active);
+  if (removingOwner && (await ownerCount(userId)) === 0) {
+    fail("last-owner");
   }
 
   const { error: updateError } = await admin
@@ -225,7 +230,7 @@ export async function resendTeamInviteAction(formData: FormData) {
   const { data, error } = await admin.auth.admin.getUserById(userId);
   if (error || !data.user?.email) fail("missing-user");
 
-  const origin = await requestOrigin();
+  const origin = canonicalSiteUrl();
   const { error: inviteError } = await admin.auth.admin.inviteUserByEmail(
     data.user.email,
     {
@@ -296,7 +301,7 @@ export async function sendMemberPasswordResetAction(formData: FormData) {
   const supabase = await createSupabaseServerClient();
   if (!supabase) fail("config");
 
-  const origin = await requestOrigin();
+  const origin = canonicalSiteUrl();
   const { error: resetError } = await supabase.auth.resetPasswordForEmail(
     data.user.email,
     {

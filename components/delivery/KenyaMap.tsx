@@ -15,7 +15,11 @@ const project = (lon: number, lat: number) => ({
   y: (5.8 - lat) * 57.471264367816076,
 });
 
-export function KenyaMap() {
+export function KenyaMap({
+  whatsappNumber,
+}: {
+  whatsappNumber?: string;
+}) {
   const [activeId, setActiveId] = useState(deliveryRegions[0].id);
   const active =
     deliveryRegions.find((region) => region.id === activeId) ??
@@ -193,10 +197,13 @@ export function KenyaMap() {
 
           <div className="mt-5 flex flex-col gap-2">
             <a
-              href={waLink(`${waMessages.delivery} My site is in ${active.name}.`)}
+              href={waLink(
+                `${waMessages.delivery} My site is in ${active.name}.`,
+                whatsappNumber,
+              )}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex h-11 items-center justify-center gap-2 bg-whatsapp text-[12px] font-medium text-white transition-opacity hover:opacity-90"
+              className="flex h-11 items-center justify-center gap-2 bg-whatsapp text-[12px] font-medium text-ink transition-opacity hover:opacity-90"
             >
               <Icon name="whatsapp" className="h-4 w-4" />
               WhatsApp a delivery quote

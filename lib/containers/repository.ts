@@ -92,11 +92,23 @@ export async function getContainerStats(): Promise<ContainerStats> {
     refrigerated: containers.filter((item) => item.type === "refrigerated")
       .length,
     featured: containers.filter((item) => item.featured).length,
-    minPrice: containers.length
-      ? Math.min(...containers.map((item) => item.price))
+    minPrice: containers.some(
+      (item) => item.status === "available" && item.price > 0,
+    )
+      ? Math.min(
+          ...containers
+            .filter((item) => item.status === "available" && item.price > 0)
+            .map((item) => item.price),
+        )
       : 0,
-    maxPrice: containers.length
-      ? Math.max(...containers.map((item) => item.price))
+    maxPrice: containers.some(
+      (item) => item.status === "available" && item.price > 0,
+    )
+      ? Math.max(
+          ...containers
+            .filter((item) => item.status === "available" && item.price > 0)
+            .map((item) => item.price),
+        )
       : 0,
     latestUpdate: containers.reduce(
       (latest, item) => (item.addedAt > latest ? item.addedAt : latest),

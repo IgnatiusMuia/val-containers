@@ -14,7 +14,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icons";
 import { CtaBand } from "@/components/home/CtaBand";
 
-const title = "About Val Containers — Nairobi Container Yard";
+const title = "About — Nairobi Container Yard";
 const description =
   "Val Containers sells new, used, fabricated and refrigerated shipping containers from Nairobi. Published prices, condition notes and countrywide delivery.";
 
@@ -27,12 +27,12 @@ export const metadata: Metadata = {
     locale: "en_KE",
     url: "/about",
     siteName: site.name,
-    title: `${title} — Val Containers`,
+    title: `${title} — ${site.name}`,
     description,
   },
   twitter: {
     card: "summary_large_image",
-    title: `${title} — Val Containers`,
+    title: `${title} — ${site.name}`,
     description,
   },
 };

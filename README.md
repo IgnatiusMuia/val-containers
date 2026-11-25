@@ -134,8 +134,11 @@ The admin area at `/admin` includes:
   `content`).
 
 Access requires an active row in `public.admin_users`. Admin sessions sign out
-after 8 hours of inactivity, and both email/password and magic-link sign-in are
-supported. The magic-link and password-reset callback is `/auth/callback`.
+after 8 hours of inactivity; the idle clock is stored on `admin_users.last_seen_at`
+and checked on the server, so it cannot be bypassed by clearing a browser cookie.
+Both email/password and magic-link sign-in are supported. PKCE links land on
+`/auth/callback`; cross-browser invite, recovery and magic-link emails use the
+token-hash route at `/auth/confirm`.
 
 Add these to `.env.local` and to the Vercel project:
 
@@ -164,6 +167,7 @@ limiting and team management also require it at runtime.
    supabase/migrations/202611240001_admin_cms.sql
    supabase/migrations/202611240002_availability_status.sql
    supabase/migrations/202611240003_public_inspection.sql
+   supabase/migrations/202611240004_permission_rls.sql
    ```
 
 3. Add the environment variables above to `.env.local` and to the Vercel
@@ -197,8 +201,47 @@ The migrations create the inventory, enquiry, content, team and audit tables,
 RLS policies, the `auth_rate_limits` table, the public `container-media` bucket
 and the private `enquiry-media` bucket. Public requests can read published
 containers with `available`, `reserved` or `inspection` availability only;
-`sold` and `unavailable` listings stay private. The admin allowlist controls
-writes.
+`sold` and `unavailable` listings stay private. Writes are gated by the
+per-area permissions (`inventory`, `media`, `enquiries`, `content`), while
+owner-only tables and storage writes stay restricted to owners. The public
+`container-media` bucket is intentional; unpublished media is not linked from
+the site, and uploads/updates/deletes require the `media` permission.
+
+### Supabase email templates
+
+Invite, recovery and magic-link emails must use token-hash links so they work
+when the recipient opens the email in a different browser or on a phone. In
+**Authentication → Email Templates**, replace the action link with:
+
+```html
+<!-- Invite -->
+<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=invite&next=/admin/reset-password">
+  Accept the invitation
+</a>
+
+<!-- Reset password -->
+<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/admin/reset-password">
+  Reset your password
+</a>
+
+<!-- Magic link -->
+<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=magiclink&next=/admin">
+  Sign in to the yard admin
+</a>
+```
+
+In **Authentication → URL Configuration**, set the Site URL to your production
+domain and add these redirect URLs:
+
+```text
+https://your-domain.example/auth/callback
+https://your-domain.example/auth/confirm
+http://localhost:3000/auth/callback
+http://localhost:3000/auth/confirm
+```
+
+Set `NEXT_PUBLIC_SITE_URL` to the same production origin. The app uses it for
+auth redirects instead of trusting the request host header.
 
 The CMS migration seeds the starting FAQs, gallery items, page copy and site
 settings, so the public site has content immediately after setup. Edit those

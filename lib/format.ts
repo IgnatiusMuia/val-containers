@@ -1,5 +1,6 @@
-export function formatKES(value: number) {
-  return `KES ${value.toLocaleString("en-KE")}`;
+export function formatKES(value: number, currency = "KES") {
+  if (!Number.isFinite(value) || value <= 0) return "Price on request";
+  return `${currency} ${value.toLocaleString("en-KE")}`;
 }
 
 export function formatMoney(value: number, currency = "KES") {
@@ -7,6 +8,7 @@ export function formatMoney(value: number, currency = "KES") {
 }
 
 export function formatCompactKES(value: number) {
+  if (!Number.isFinite(value) || value <= 0) return "Price on request";
   if (value >= 1_000_000) {
     const millions = value / 1_000_000;
     return `KES ${millions.toFixed(millions % 1 === 0 ? 0 : 1)}M`;

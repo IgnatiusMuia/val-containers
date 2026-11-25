@@ -1,68 +1,62 @@
-import { NextResponse } from "next/server";
-import {
-  ADMIN_ACTIVITY_COOKIE,
-  adminActivityCookieOptions,
-} from "@/lib/auth-constants";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { safeAdminNext } from "@/lib/site-url";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import {
+  createRouteHandlerSupabaseClient,
+  redirectWithCookies,
+} from "@/lib/supabase/route";
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
-  const rawNext = requestUrl.searchParams.get("next") ?? "/admin";
-  const next =
-    rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/admin";
+  const next = safeAdminNext(
+    requestUrl.searchParams.get("next"),
+    requestUrl.origin,
+  );
 
-  if (code) {
-    const supabase = await createSupabaseServerClient();
+  const loginRedirect = (error: string) =>
+    NextResponse.redirect(
+      new URL(`/admin/login?error=${error}`, requestUrl.origin),
+    );
 
-    if (supabase) {
-      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+  if (!code) return loginRedirect("auth");
 
-      if (!error) {
-        const user = data.user;
-        const admin = createSupabaseAdminClient();
-        let activeAccount = false;
+  const client = createRouteHandlerSupabaseClient(request);
+  if (!client) return loginRedirect("config");
 
-        if (user && admin) {
-          const now = new Date().toISOString();
-          const { data: account } = await admin
-            .from("admin_users")
-            .select("active, accepted_at")
-            .eq("user_id", user.id)
-            .maybeSingle();
+  const { data, error } = await client.supabase.auth.exchangeCodeForSession(code);
 
-          activeAccount = Boolean(account?.active);
-
-          if (account?.active) {
-            await admin
-              .from("admin_users")
-              .update({
-                last_seen_at: now,
-                ...(account.accepted_at ? {} : { accepted_at: now }),
-              })
-              .eq("user_id", user.id);
-          }
-        }
-
-        const destination = NextResponse.redirect(
-          new URL(next, requestUrl.origin),
-        );
-
-        if (activeAccount) {
-          destination.cookies.set(
-            ADMIN_ACTIVITY_COOKIE,
-            String(Date.now()),
-            adminActivityCookieOptions,
-          );
-        }
-
-        return destination;
-      }
-    }
+  if (error || !data.user) {
+    return redirectWithCookies(loginRedirect("auth"), client.response);
   }
 
-  return NextResponse.redirect(
-    new URL("/admin/login?error=auth", requestUrl.origin),
+  const admin = createSupabaseAdminClient();
+  if (!admin) {
+    return redirectWithCookies(loginRedirect("config"), client.response);
+  }
+
+  const now = new Date().toISOString();
+  const { data: account } = await admin
+    .from("admin_users")
+    .select("active, accepted_at")
+    .eq("user_id", data.user.id)
+    .maybeSingle();
+
+  if (!account?.active) {
+    await client.supabase.auth.signOut();
+    return redirectWithCookies(loginRedirect("not-admin"), client.response);
+  }
+
+  await admin
+    .from("admin_users")
+    .update({
+      last_seen_at: now,
+      ...(account.accepted_at ? {} : { accepted_at: now }),
+    })
+    .eq("user_id", data.user.id);
+
+  return redirectWithCookies(
+    NextResponse.redirect(new URL(next, requestUrl.origin)),
+    client.response,
   );
 }

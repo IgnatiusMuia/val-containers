@@ -42,7 +42,7 @@ export function localBusinessSchema(
     description: settings.description,
     slogan: settings.tagline,
     url: site.url,
-    telephone: settings.phoneDisplay,
+    telephone: settings.phoneHref.replace(/^tel:/, ""),
     email: settings.email,
     image: `${site.url}/opengraph-image`,
     priceRange,

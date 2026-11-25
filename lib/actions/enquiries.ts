@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import sharp from "sharp";
 import { consumeAuthAttempt, rateLimitMessage } from "@/lib/auth-rate-limit";
+import { getSiteSettings } from "@/lib/content";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { enquiryInputSchema } from "@/lib/validation/enquiry";
 import { normalizePhone } from "@/lib/validation/phone";
@@ -106,12 +107,15 @@ export async function submitEnquiryAction(
   }
 
   const values = parsed.data;
+  const settings = await getSiteSettings();
+
   if (values.website) {
     return {
       ok: true,
       reference: "VC-E-PENDING",
       whatsappUrl: waLink(
         "Hi Val Containers, I have just submitted an enquiry through your website.",
+        settings.whatsappNumber,
       ),
     };
   }
@@ -158,6 +162,7 @@ export async function submitEnquiryAction(
       .select("id, name, slug, reference, type, size, condition_label")
       .eq("id", values.containerId)
       .eq("publication_status", "published")
+      .in("status", ["available", "reserved", "inspection"])
       .maybeSingle();
     snapshot = data ?? null;
   }
@@ -241,6 +246,6 @@ export async function submitEnquiryAction(
   return {
     ok: true,
     reference: enquiry.reference,
-    whatsappUrl: waLink(lines.join("\n")),
+    whatsappUrl: waLink(lines.join("\n"), settings.whatsappNumber),
   };
 }

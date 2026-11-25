@@ -18,7 +18,9 @@ export default async function EditContainerPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireAdmin("inventory");
+  const { account } = await requireAdmin("inventory");
+  const canManageMedia =
+    account.role === "owner" || account.permissions.includes("media");
   const { id } = await params;
   const container = await getAdminContainer(id);
   if (!container) notFound();
@@ -86,10 +88,16 @@ export default async function EditContainerPage({
         initial={initial}
         submitLabel="Save changes"
       />
-      <MediaManager
-        containerId={container.id}
-        media={container.container_media}
-      />
+      {canManageMedia ? (
+        <MediaManager
+          containerId={container.id}
+          media={container.container_media}
+        />
+      ) : (
+        <p className="mt-8 border border-bone/12 p-4 text-sm text-bone/55">
+          Photos and videos are managed by a team member with media permission.
+        </p>
+      )}
     </div>
   );
 }

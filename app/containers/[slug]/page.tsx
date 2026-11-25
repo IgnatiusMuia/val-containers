@@ -378,19 +378,26 @@ export default async function ContainerPage({
             </ButtonLink>
           </div>
 
-          <div className="no-scrollbar mt-8 flex snap-x gap-4 overflow-x-auto pb-4 sm:gap-5">
-            {related.map((item) => (
-              <div
-                key={item.slug}
-                className="w-[268px] shrink-0 snap-start sm:w-[312px]"
-              >
-                <ContainerCard
-                  container={item}
-                  imageSizes="(min-width: 640px) 312px, 268px"
-                />
-              </div>
-            ))}
-          </div>
+          {related.length === 0 ? (
+            <p className="mt-8 max-w-xl text-sm leading-relaxed text-bone/55">
+              More units are being inspected and photographed. Tell us the job
+              and we will send the next matching container.
+            </p>
+          ) : (
+            <div className="no-scrollbar mt-8 flex snap-x gap-4 overflow-x-auto pb-4 sm:gap-5">
+              {related.map((item) => (
+                <div
+                  key={item.slug}
+                  className="w-[268px] shrink-0 snap-start sm:w-[312px]"
+                >
+                  <ContainerCard
+                    container={item}
+                    imageSizes="(min-width: 640px) 312px, 268px"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
 
           <ButtonLink
             href="/containers"
@@ -421,6 +428,8 @@ export default async function ContainerPage({
         price={container.price}
         whatsappMessage={message}
         source={`sticky-${container.slug}`}
+        containerSlug={container.slug}
+        whatsappNumber={settings.whatsappNumber}
       />
     </>
   );

@@ -43,7 +43,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <JsonLd data={faqSchema(faqItems)} />
+      {faqItems.length > 0 ? <JsonLd data={faqSchema(faqItems)} /> : null}
       <HomeHero />
       <TrustMarquee />
       <FeaturedFleet />

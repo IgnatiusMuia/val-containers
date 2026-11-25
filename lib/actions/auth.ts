@@ -1,29 +1,19 @@
 "use server";
 
-import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
-  ADMIN_ACTIVITY_COOKIE,
-  adminActivityCookieOptions,
-} from "@/lib/auth-constants";
-import { consumeAuthAttempt, rateLimitMessage, requestFingerprint } from "@/lib/auth-rate-limit";
+  consumeAuthAttempt,
+  rateLimitMessage,
+  requestFingerprint,
+  resetAuthAttempt,
+} from "@/lib/auth-rate-limit";
+import { canonicalSiteUrl } from "@/lib/site-url";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export interface AuthActionState {
   error?: string;
   message?: string;
-}
-
-async function requestOrigin() {
-  const requestHeaders = await headers();
-  const host =
-    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
-  const protocol =
-    requestHeaders.get("x-forwarded-proto") ??
-    (process.env.NODE_ENV === "production" ? "https" : "http");
-  if (!host) return process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  return `${protocol}://${host}`;
 }
 
 function readEmail(value: FormDataEntryValue | null) {
@@ -44,15 +34,16 @@ export async function loginAction(
     return { error: "Enter your email and password." };
   }
 
-  const fingerprint = await requestFingerprint(email);
-  const limit = await consumeAuthAttempt({ key: `password:${fingerprint}` });
-  if (!limit.allowed) {
-    return { error: rateLimitMessage(limit.retryAfter) };
-  }
-
   const supabase = await createSupabaseServerClient();
   if (!supabase) {
     return { error: "Admin sign-in is not configured yet." };
+  }
+
+  const fingerprint = await requestFingerprint(email);
+  const rateLimitKey = `password:${fingerprint}`;
+  const limit = await consumeAuthAttempt({ key: rateLimitKey });
+  if (!limit.allowed) {
+    return { error: rateLimitMessage(limit.retryAfter) };
   }
 
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -90,12 +81,7 @@ export async function loginAction(
     })
     .eq("user_id", data.user.id);
 
-  const cookieStore = await cookies();
-  cookieStore.set(
-    ADMIN_ACTIVITY_COOKIE,
-    String(Date.now()),
-    adminActivityCookieOptions,
-  );
+  await resetAuthAttempt(rateLimitKey);
 
   redirect("/admin");
 }
@@ -106,6 +92,9 @@ export async function magicLinkAction(
 ): Promise<AuthActionState> {
   const email = readEmail(formData.get("email"));
   if (!email) return { error: "Enter your email address first." };
+
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { error: "Admin sign-in is not configured yet." };
 
   const fingerprint = await requestFingerprint(email);
   const limit = await consumeAuthAttempt({
@@ -118,15 +107,11 @@ export async function magicLinkAction(
     return { error: rateLimitMessage(limit.retryAfter) };
   }
 
-  const supabase = await createSupabaseServerClient();
-  if (!supabase) return { error: "Admin sign-in is not configured yet." };
-
-  const origin = await requestOrigin();
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
       shouldCreateUser: false,
-      emailRedirectTo: `${origin}/auth/callback?next=/admin`,
+      emailRedirectTo: `${canonicalSiteUrl()}/auth/callback?next=/admin`,
     },
   });
 
@@ -147,6 +132,9 @@ export async function forgotPasswordAction(
   const email = readEmail(formData.get("email"));
   if (!email) return { error: "Enter your email address." };
 
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { error: "Admin sign-in is not configured yet." };
+
   const fingerprint = await requestFingerprint(email);
   const limit = await consumeAuthAttempt({
     key: `reset:${fingerprint}`,
@@ -158,12 +146,8 @@ export async function forgotPasswordAction(
     return { error: rateLimitMessage(limit.retryAfter) };
   }
 
-  const supabase = await createSupabaseServerClient();
-  if (!supabase) return { error: "Admin sign-in is not configured yet." };
-
-  const origin = await requestOrigin();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/callback?next=/admin/reset-password`,
+    redirectTo: `${canonicalSiteUrl()}/auth/callback?next=/admin/reset-password`,
   });
 
   if (error) {
@@ -211,13 +195,6 @@ export async function resetPasswordAction(
   if (error) {
     return { error: "Could not update the password. Request a new link." };
   }
-
-  const cookieStore = await cookies();
-  cookieStore.set(
-    ADMIN_ACTIVITY_COOKIE,
-    String(Date.now()),
-    adminActivityCookieOptions,
-  );
 
   redirect("/admin?reset=1");
 }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { sizes, sizeFits, sizeDecision } from "@/data/sizes";
 import { site } from "@/data/site";
 import { breadcrumbSchema, faqSchema } from "@/lib/schema";
+import { currentYear } from "@/lib/time";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { ButtonLink } from "@/components/ui/Button";
@@ -52,7 +53,9 @@ const sizeFaqs = [
   },
 ];
 
-export default function SizeGuidePage() {
+export default async function SizeGuidePage() {
+  const year = await currentYear();
+
   return (
     <>
       <JsonLd
@@ -73,7 +76,9 @@ export default function SizeGuidePage() {
           />
           <div className="grid items-end gap-10 lg:grid-cols-12">
             <div className="lg:col-span-8">
-              <p className="eyebrow text-ember">Size guide · 2026</p>
+              <p className="eyebrow text-ember">
+                Size guide · {year}
+              </p>
               <h1 className="mt-5 font-display text-[clamp(2.8rem,6.2vw,5.2rem)] font-bold leading-[0.92] tracking-[-0.05em] text-bone">
                 Pick the size
                 <br />

@@ -174,7 +174,7 @@ export async function HomeHero() {
                 href={waLink(waMessages.general, settings.whatsappNumber)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-5 flex h-11 items-center justify-center gap-2 bg-whatsapp px-4 text-[12.5px] font-medium text-white transition-opacity hover:opacity-90"
+                className="mt-5 flex h-11 items-center justify-center gap-2 bg-whatsapp px-4 text-[12.5px] font-medium text-ink transition-opacity hover:opacity-90"
               >
                 <Icon name="whatsapp" className="h-4 w-4" />
                 WhatsApp the yard

@@ -141,6 +141,8 @@ export async function saveGalleryItemAction(formData: FormData) {
   const publicationStatus = text(formData, "publicationStatus") || "draft";
 
   if (!title || !src || !alt) return;
+  if (!/^https?:\/\//i.test(src) && !src.startsWith("/")) return;
+  if (!["draft", "published", "archived"].includes(publicationStatus)) return;
 
   const supabase = await createSupabaseServerClient();
   if (!supabase) return;

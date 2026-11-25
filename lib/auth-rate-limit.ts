@@ -4,11 +4,14 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export async function requestFingerprint(identifier: string) {
   const requestHeaders = await headers();
+  const realIp = requestHeaders.get("x-real-ip")?.trim();
   const forwarded = requestHeaders.get("x-forwarded-for") ?? "";
-  const ip =
-    forwarded.split(",")[0]?.trim() ||
-    requestHeaders.get("x-real-ip") ||
-    "unknown";
+  const forwardedIp = forwarded
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .at(-1);
+  const ip = realIp || forwardedIp || "unknown";
   const hash = createHash("sha256")
     .update(`${identifier.trim().toLowerCase()}|${ip}`)
     .digest("hex")
@@ -23,7 +26,7 @@ export async function consumeAuthAttempt(input: {
   blockSeconds?: number;
 }) {
   const supabase = createSupabaseAdminClient();
-  if (!supabase) return { allowed: false, retryAfter: 60 };
+  if (!supabase) return { allowed: true, retryAfter: 0 };
 
   const { data, error } = await supabase.rpc("consume_auth_attempt", {
     p_key: input.key,
@@ -34,7 +37,7 @@ export async function consumeAuthAttempt(input: {
 
   if (error) {
     console.error("Could not check auth rate limit:", error.message);
-    return { allowed: false, retryAfter: 60 };
+    return { allowed: true, retryAfter: 0 };
   }
 
   const row = Array.isArray(data) ? data[0] : data;
@@ -42,6 +45,20 @@ export async function consumeAuthAttempt(input: {
     allowed: Boolean(row?.allowed),
     retryAfter: Number(row?.retry_after ?? 60),
   };
+}
+
+export async function resetAuthAttempt(key: string) {
+  const supabase = createSupabaseAdminClient();
+  if (!supabase) return;
+
+  const { error } = await supabase
+    .from("auth_rate_limits")
+    .delete()
+    .eq("key", key);
+
+  if (error) {
+    console.error("Could not reset auth rate limit:", error.message);
+  }
 }
 
 export function rateLimitMessage(retryAfter: number) {

@@ -10,6 +10,26 @@ const BUCKET = "container-media";
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
 const IMAGE_FORMATS = new Set(["jpeg", "png", "webp"]);
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isUuid(value: string) {
+  return UUID_PATTERN.test(value);
+}
+
+async function containerExists(
+  supabase: NonNullable<Awaited<ReturnType<typeof createSupabaseServerClient>>>,
+  containerId: string,
+) {
+  const { data, error } = await supabase
+    .from("containers")
+    .select("id")
+    .eq("id", containerId)
+    .maybeSingle();
+
+  if (error) return { exists: false, error: error.message };
+  return { exists: Boolean(data), error: null };
+}
 
 function invalidateContainer(slug: string) {
   updateTag("containers");
@@ -80,6 +100,12 @@ export async function createMediaUploadAction(
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { error: "Supabase is not configured." };
 
+  if (!isUuid(containerId)) return { error: "Invalid listing." };
+
+  const container = await containerExists(supabase, containerId);
+  if (container.error) return { error: container.error };
+  if (!container.exists) return { error: "Listing not found." };
+
   const safeName = fileName
     .toLowerCase()
     .replace(/[^a-z0-9._-]+/g, "-")
@@ -114,15 +140,24 @@ export async function finalizeMediaAction({
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { error: "Supabase is not configured." };
 
+  if (!isUuid(containerId)) return { error: "Invalid listing." };
+
   const cleanAlt = alt.trim();
   if (cleanAlt.length < 3) return { error: "Add meaningful alt text." };
   if (cleanAlt.length > 220) return { error: "Alt text is too long." };
-  if (!path.startsWith(`${containerId}/`)) {
+  if (!path.startsWith(`${containerId}/`) || path.includes("..")) {
     return { error: "Invalid upload path." };
   }
-  if (posterPath && !posterPath.startsWith(`${containerId}/`)) {
+  if (
+    posterPath &&
+    (!posterPath.startsWith(`${containerId}/`) || posterPath.includes(".."))
+  ) {
     return { error: "Invalid poster path." };
   }
+
+  const container = await containerExists(supabase, containerId);
+  if (container.error) return { error: container.error };
+  if (!container.exists) return { error: "Listing not found." };
 
   const uploaded = [path, posterPath].filter(Boolean) as string[];
 

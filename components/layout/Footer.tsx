@@ -4,6 +4,7 @@ import type { SiteSettings } from "@/lib/site-settings";
 import { Icon } from "@/components/ui/Icons";
 import { Logo } from "@/components/ui/Logo";
 import { waLink, waMessages } from "@/lib/whatsapp";
+import { currentYear } from "@/lib/time";
 
 const columns = [
   { title: "The fleet", links: footerLinks.fleet },
@@ -11,8 +12,8 @@ const columns = [
   { title: "Company", links: footerLinks.company },
 ] as const;
 
-export function Footer({ settings }: { settings: SiteSettings }) {
-  const year = 2026;
+export async function Footer({ settings }: { settings: SiteSettings }) {
+  const year = await currentYear();
 
   return (
     <footer className="border-t border-bone/12 bg-ink">

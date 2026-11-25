@@ -2,7 +2,11 @@ import {
   getContainers,
   getFeaturedContainers,
 } from "@/lib/containers/repository";
-import { contentValue, getSiteContent } from "@/lib/content";
+import {
+  contentValue,
+  getSiteContent,
+  getSiteSettings,
+} from "@/lib/content";
 import { waLink, waMessages } from "@/lib/whatsapp";
 import { ButtonLink } from "@/components/ui/Button";
 import { ContainerCard } from "@/components/containers/ContainerCard";
@@ -18,11 +22,13 @@ const spans = [
 ] as const;
 
 export async function FeaturedFleet() {
-  const [containers, featuredContainers, content] = await Promise.all([
-    getContainers(),
-    getFeaturedContainers(),
-    getSiteContent(),
-  ]);
+  const [containers, featuredContainers, content, settings] =
+    await Promise.all([
+      getContainers(),
+      getFeaturedContainers(),
+      getSiteContent(),
+      getSiteSettings(),
+    ]);
   const label = contentValue(content, "home.fleet.eyebrow", "The fleet");
   const heading = contentValue(
     content,
@@ -52,6 +58,14 @@ export async function FeaturedFleet() {
           />
         </Reveal>
 
+        {featuredContainers.length === 0 ? (
+          <div className="mt-12 border border-bone/12 p-6">
+            <p className="text-sm text-bone/55">
+              New stock is being photographed and inspected. Tell us what you
+              need and we will send the next matching unit.
+            </p>
+          </div>
+        ) : (
         <div className="mt-12 grid gap-5 lg:grid-cols-12">
           {featuredContainers.map((container, index) => (
             <Reveal
@@ -68,6 +82,7 @@ export async function FeaturedFleet() {
             </Reveal>
           ))}
         </div>
+        )}
 
         <div className="mt-8 flex flex-col justify-between gap-4 border-t border-bone/10 pt-5 sm:flex-row sm:items-center">
           <p className="max-w-xl text-[12px] leading-relaxed text-bone/40">
@@ -75,7 +90,7 @@ export async function FeaturedFleet() {
             closest alternative rather than quietly swapping it.
           </p>
           <a
-            href={waLink(waMessages.fabrication)}
+            href={waLink(waMessages.fabrication, settings.whatsappNumber)}
             target="_blank"
             rel="noopener noreferrer"
             className="group inline-flex items-center gap-2 text-[12.5px] font-medium text-bone/70 transition-colors hover:text-ember"

@@ -1,10 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import {
-  ADMIN_ACTIVITY_COOKIE,
-  ADMIN_IDLE_SECONDS,
-  adminActivityCookieOptions,
-} from "@/lib/auth-constants";
+import { ADMIN_IDLE_SECONDS } from "@/lib/auth-constants";
 import { getSupabaseEnv } from "@/lib/supabase/config";
 
 const publicAdminRoutes = [
@@ -20,6 +16,11 @@ function loginRedirect(request: NextRequest, error?: string) {
   return NextResponse.redirect(url);
 }
 
+function withCookies(redirect: NextResponse, response: NextResponse) {
+  response.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+  return redirect;
+}
+
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isAdminRoute = pathname.startsWith("/admin");
@@ -30,13 +31,19 @@ export async function proxy(request: NextRequest) {
   const env = getSupabaseEnv();
 
   if (!env) {
-    if (needsAdmin) return loginRedirect(request);
+    if (needsAdmin) return loginRedirect(request, "config");
     return NextResponse.next();
   }
 
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(env.url, env.anonKey, {
+    cookieOptions: {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    },
     cookies: {
       getAll() {
         return request.cookies.getAll();
@@ -58,29 +65,28 @@ export async function proxy(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) return loginRedirect(request);
+    if (!user) return withCookies(loginRedirect(request), response);
 
-    const lastActivity = Number(
-      request.cookies.get(ADMIN_ACTIVITY_COOKIE)?.value ?? 0,
-    );
-    if (lastActivity && Date.now() - lastActivity > ADMIN_IDLE_SECONDS * 1000) {
-      return loginRedirect(request, "expired");
+    const { data, error } = await supabase.rpc("touch_admin_session", {
+      p_idle_seconds: ADMIN_IDLE_SECONDS,
+    });
+
+    if (error) {
+      console.error("Could not check admin session:", error.message);
+      return withCookies(loginRedirect(request, "config"), response);
     }
 
-    const { data: adminUser } = await supabase
-      .from("admin_users")
-      .select("user_id")
-      .eq("user_id", user.id)
-      .eq("active", true)
-      .maybeSingle();
+    const session = (Array.isArray(data) ? data[0] : data) as
+      | { active?: boolean; expired?: boolean }
+      | null
+      | undefined;
 
-    if (!adminUser) return loginRedirect(request, "not-admin");
-
-    response.cookies.set(
-      ADMIN_ACTIVITY_COOKIE,
-      String(Date.now()),
-      adminActivityCookieOptions,
-    );
+    if (!session?.active) {
+      return withCookies(
+        loginRedirect(request, session?.expired ? "expired" : "not-admin"),
+        response,
+      );
+    }
   }
 
   return response;

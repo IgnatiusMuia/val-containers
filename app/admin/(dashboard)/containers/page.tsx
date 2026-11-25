@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { requireAdmin } from "@/lib/auth";
 import { getAdminContainers } from "@/lib/containers/admin";
 import { formatKES } from "@/lib/format";
 import {
@@ -39,6 +40,7 @@ export default async function AdminContainersPage({
   }>;
 }) {
   const { saved, status, publication } = await searchParams;
+  await requireAdmin("inventory");
 
   let rows: Awaited<ReturnType<typeof getAdminContainers>> = [];
   let error: string | null = null;

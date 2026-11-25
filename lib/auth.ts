@@ -1,8 +1,7 @@
 import "server-only";
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ADMIN_ACTIVITY_COOKIE, ADMIN_IDLE_SECONDS } from "@/lib/auth-constants";
+import { ADMIN_IDLE_SECONDS } from "@/lib/auth-constants";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { AdminPermission } from "@/lib/permissions";
 
@@ -12,6 +11,14 @@ export interface AdminAccount {
   displayName: string | null;
   active: boolean;
   permissions: AdminPermission[];
+}
+
+interface AdminSessionRow {
+  active: boolean;
+  expired: boolean;
+  role: string | null;
+  display_name: string | null;
+  permissions: string[] | null;
 }
 
 export async function getCurrentUser() {
@@ -25,56 +32,80 @@ export async function getCurrentUser() {
   return user;
 }
 
-export async function getAdminAccount(userId: string): Promise<AdminAccount | null> {
+async function getAdminSession() {
   const supabase = await createSupabaseServerClient();
-  if (!supabase) return null;
+  if (!supabase) {
+    return { user: null, account: null, expired: false, configError: true };
+  }
 
-  const { data } = await supabase
-    .from("admin_users")
-    .select("role, display_name, active, permissions")
-    .eq("user_id", userId)
-    .maybeSingle();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!data || !data.active) return null;
+  if (!user) {
+    return { user: null, account: null, expired: false, configError: false };
+  }
 
-  return {
-    userId,
-    role: data.role === "owner" ? "owner" : "admin",
-    displayName: data.display_name ?? null,
-    active: data.active,
-    permissions: (data.permissions ?? []) as AdminPermission[],
+  const { data, error } = await supabase.rpc("touch_admin_session", {
+    p_idle_seconds: ADMIN_IDLE_SECONDS,
+  });
+
+  if (error) {
+    console.error("Could not check admin session:", error.message);
+    return { user, account: null, expired: false, configError: true };
+  }
+
+  const row = (Array.isArray(data) ? data[0] : data) as
+    | AdminSessionRow
+    | null
+    | undefined;
+
+  if (!row || !row.active) {
+    return {
+      user,
+      account: null,
+      expired: Boolean(row?.expired),
+      configError: false,
+    };
+  }
+
+  const account: AdminAccount = {
+    userId: user.id,
+    role: row.role === "owner" ? "owner" : "admin",
+    displayName: row.display_name ?? null,
+    active: true,
+    permissions: (row.permissions ?? []) as AdminPermission[],
   };
+
+  return { user, account, expired: false, configError: false };
 }
 
 export async function requireAdmin(permission?: AdminPermission) {
-  const user = await getCurrentUser();
+  const session = await getAdminSession();
 
-  if (!user) {
+  if (session.configError) {
+    redirect("/admin/login?error=config");
+  }
+
+  if (!session.user) {
     redirect("/admin/login");
   }
 
-  const cookieStore = await cookies();
-  const activity = Number(cookieStore.get(ADMIN_ACTIVITY_COOKIE)?.value ?? 0);
-  // The proxy sets this cookie on the response. A missing cookie means this is
-  // the first admin request after sign-in, so only reject an expired one.
-  if (activity && Date.now() - activity > ADMIN_IDLE_SECONDS * 1000) {
-    redirect("/admin/login?error=expired");
-  }
-
-  const account = await getAdminAccount(user.id);
-  if (!account) {
-    redirect("/admin/login?error=not-admin");
+  if (!session.account) {
+    redirect(
+      session.expired ? "/admin/login?error=expired" : "/admin/login?error=not-admin",
+    );
   }
 
   if (
     permission &&
-    account.role !== "owner" &&
-    !account.permissions.includes(permission)
+    session.account.role !== "owner" &&
+    !session.account.permissions.includes(permission)
   ) {
     redirect("/admin?error=forbidden");
   }
 
-  return { user, account, ...account };
+  return { user: session.user, account: session.account, ...session.account };
 }
 
 export async function requireOwner() {

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getContainers } from "@/lib/containers/repository";
+import { getSiteSettings } from "@/lib/content";
+import { currentMonthYear } from "@/lib/time";
 import { site } from "@/data/site";
 import { breadcrumbSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -87,7 +89,11 @@ function CatalogFallback() {
 }
 
 export default async function ContainersPage() {
-  const containers = await getContainers();
+  const [containers, settings, fleetLabel] = await Promise.all([
+    getContainers(),
+    getSiteSettings(),
+    currentMonthYear(),
+  ]);
   const counts = catalogCounts(containers);
 
   return (
@@ -110,7 +116,9 @@ export default async function ContainersPage() {
           />
           <div className="grid items-end gap-10 lg:grid-cols-12">
             <div className="lg:col-span-8">
-              <p className="eyebrow text-ember">The fleet · November 2026</p>
+              <p className="eyebrow text-ember">
+                The fleet · {fleetLabel}
+              </p>
               <h1 className="mt-5 font-display text-[clamp(2.8rem,6.4vw,5.4rem)] font-bold leading-[0.92] tracking-[-0.05em] text-bone">
                 See the unit.
                 <br />
@@ -148,7 +156,10 @@ export default async function ContainersPage() {
 
       <div className="pt-8">
         <Suspense fallback={<CatalogFallback />}>
-          <Catalog containers={containers} />
+          <Catalog
+            containers={containers}
+            whatsappNumber={settings.whatsappNumber}
+          />
         </Suspense>
       </div>
     </>

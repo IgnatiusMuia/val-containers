@@ -6,11 +6,12 @@ import { blogPosts } from "@/data/blog";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const containers = await getContainers();
+  const timestamps = [
+    ...containers.map((container) => new Date(container.addedAt).getTime()),
+    ...blogPosts.map((post) => new Date(post.date).getTime()),
+  ];
   const lastModified = new Date(
-    Math.max(
-      ...containers.map((container) => new Date(container.addedAt).getTime()),
-      ...blogPosts.map((post) => new Date(post.date).getTime()),
-    ),
+    timestamps.length > 0 ? Math.max(...timestamps) : Date.now(),
   );
 
   const staticPages = [
@@ -22,6 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/about", priority: 0.6, changeFrequency: "yearly" as const },
     { path: "/blog", priority: 0.7, changeFrequency: "weekly" as const },
     { path: "/contact", priority: 0.8, changeFrequency: "yearly" as const },
+    { path: "/enquire", priority: 0.8, changeFrequency: "monthly" as const },
   ];
 
   return [

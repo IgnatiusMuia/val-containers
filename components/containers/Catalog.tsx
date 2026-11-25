@@ -101,9 +101,11 @@ function FilterGroup({
 function CatalogUI({
   initialType,
   containers,
+  whatsappNumber,
 }: {
   initialType: TypeFilter;
   containers: Container[];
+  whatsappNumber?: string;
 }) {
   const [query, setQuery] = useState("");
   const [type, setType] = useState<TypeFilter>(initialType);
@@ -410,10 +412,10 @@ function CatalogUI({
                     Reset filters
                   </button>
                   <a
-                    href={waLink(waMessages.fabrication)}
+                    href={waLink(waMessages.fabrication, whatsappNumber)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex h-10 items-center gap-2 bg-whatsapp px-4 text-[12.5px] font-medium text-white transition-opacity hover:opacity-90"
+                    className="inline-flex h-10 items-center gap-2 bg-whatsapp px-4 text-[12.5px] font-medium text-ink transition-opacity hover:opacity-90"
                   >
                     <Icon name="whatsapp" className="h-4 w-4" />
                     Ask the yard
@@ -434,7 +436,13 @@ function CatalogUI({
   );
 }
 
-export function Catalog({ containers }: { containers: Container[] }) {
+export function Catalog({
+  containers,
+  whatsappNumber,
+}: {
+  containers: Container[];
+  whatsappNumber?: string;
+}) {
   const searchParams = useSearchParams();
   const typeParam = searchParams.get("type");
   const initialType: TypeFilter =
@@ -449,6 +457,7 @@ export function Catalog({ containers }: { containers: Container[] }) {
       key={`${initialType}-${searchParams.toString()}`}
       initialType={initialType}
       containers={containers}
+      whatsappNumber={whatsappNumber}
     />
   );
 }

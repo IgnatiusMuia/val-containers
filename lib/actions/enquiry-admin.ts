@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { enquiryStatuses, type EnquiryStatus } from "@/lib/enquiry-status";
@@ -26,13 +27,13 @@ export async function updateEnquiryStatusAction(formData: FormData) {
       status,
       ...(status === "converted" || status === "closed"
         ? { closed_at: new Date().toISOString() }
-        : {}),
+        : { closed_at: null }),
     })
     .eq("id", id);
 
   if (error) {
     console.error("Could not update enquiry status:", error.message);
-    return;
+    redirect(`/admin/enquiries/${id}?error=status`);
   }
 
   await supabase.from("enquiry_activity").insert({
@@ -65,7 +66,7 @@ export async function addEnquiryNoteAction(formData: FormData) {
 
   if (error) {
     console.error("Could not add enquiry note:", error.message);
-    return;
+    redirect(`/admin/enquiries/${id}?error=note`);
   }
 
   await supabase.from("enquiry_activity").insert({
@@ -105,7 +106,7 @@ export async function addEnquiryQuotationAction(formData: FormData) {
 
   if (error) {
     console.error("Could not add quotation:", error.message);
-    return;
+    redirect(`/admin/enquiries/${id}?error=quotation`);
   }
 
   await supabase
@@ -141,7 +142,9 @@ export async function assignEnquiryAction(formData: FormData) {
     .update({ assigned_to: user.id })
     .eq("id", id);
 
-  if (error) return;
+  if (error) {
+    redirect(`/admin/enquiries/${id}?error=assign`);
+  }
 
   await supabase.from("enquiry_activity").insert({
     enquiry_id: id,
@@ -168,7 +171,9 @@ export async function updateFollowUpAction(formData: FormData) {
     .update({ follow_up_at: followUpAt || null })
     .eq("id", id);
 
-  if (error) return;
+  if (error) {
+    redirect(`/admin/enquiries/${id}?error=follow-up`);
+  }
 
   await supabase.from("enquiry_activity").insert({
     enquiry_id: id,

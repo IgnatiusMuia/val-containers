@@ -18,11 +18,11 @@ export interface EnquiryContainerOption {
 const initialState: EnquiryActionState = {};
 
 const inputClass =
-  "h-11 w-full border border-ink/20 bg-bone px-3 text-[13px] text-ink placeholder:text-ink/30 focus:border-ember-deep focus:outline-none";
+  "h-11 w-full border border-ink/20 bg-bone px-3 text-[13px] text-ink placeholder:text-ink/50 focus:border-ember-deep focus:outline-2 focus:outline-offset-2 focus:outline-ember-deep";
 const labelClass =
-  "mb-1.5 block font-mono text-[8.5px] uppercase tracking-[0.12em] text-ink/45";
+  "mb-1.5 block font-mono text-[8.5px] uppercase tracking-[0.12em] text-ink/60";
 const textareaClass =
-  "w-full resize-y border border-ink/20 bg-bone px-3 py-2.5 text-[13px] leading-relaxed text-ink placeholder:text-ink/30 focus:border-ember-deep focus:outline-none";
+  "w-full resize-y border border-ink/20 bg-bone px-3 py-2.5 text-[13px] leading-relaxed text-ink placeholder:text-ink/50 focus:border-ember-deep focus:outline-2 focus:outline-offset-2 focus:outline-ember-deep";
 
 function FieldError({
   errors,
@@ -33,7 +33,11 @@ function FieldError({
 }) {
   const message = errors?.[name]?.[0];
   if (!message) return null;
-  return <p className="mt-1 text-[11px] text-red-700">{message}</p>;
+  return (
+    <p id={`${name}-error`} role="alert" className="mt-1 text-[11px] text-red-700">
+      {message}
+    </p>
+  );
 }
 
 export function EnquiryForm({
@@ -71,7 +75,7 @@ export function EnquiryForm({
             href={state.whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-5 flex h-12 items-center justify-center gap-2 bg-whatsapp text-[13px] font-medium text-white transition-opacity hover:opacity-90"
+            className="mt-5 flex h-12 items-center justify-center gap-2 bg-whatsapp text-[13px] font-medium text-ink transition-opacity hover:opacity-90"
           >
             <Icon name="whatsapp" className="h-4 w-4" />
             Continue on WhatsApp
@@ -79,7 +83,7 @@ export function EnquiryForm({
         ) : null}
         <Link
           href="/enquire"
-          className="mt-4 inline-flex text-[11px] text-ink/45 underline decoration-ink/20 underline-offset-4 hover:text-ink"
+          className="mt-4 inline-flex text-[11px] text-ink/60 underline decoration-ink/20 underline-offset-4 hover:text-ink"
         >
           Send another enquiry
         </Link>
@@ -101,7 +105,10 @@ export function EnquiryForm({
       />
 
       {state.error ? (
-        <p className="border border-red-700/25 bg-red-700/5 px-3 py-2 text-sm text-red-800">
+        <p
+          role="alert"
+          className="border border-red-700/25 bg-red-700/5 px-3 py-2 text-sm text-red-800"
+        >
           {state.error}
         </p>
       ) : null}
@@ -117,6 +124,10 @@ export function EnquiryForm({
             required
             autoComplete="name"
             placeholder="Your name"
+            aria-invalid={Boolean(state.fieldErrors?.name)}
+            aria-describedby={
+              state.fieldErrors?.name ? "name-error" : undefined
+            }
             className={inputClass}
           />
           <FieldError errors={state.fieldErrors} name="name" />
@@ -132,6 +143,10 @@ export function EnquiryForm({
             required
             autoComplete="tel"
             placeholder="+254…"
+            aria-invalid={Boolean(state.fieldErrors?.phone)}
+            aria-describedby={
+              state.fieldErrors?.phone ? "phone-error" : undefined
+            }
             className={inputClass}
           />
           <FieldError errors={state.fieldErrors} name="phone" />
@@ -146,6 +161,10 @@ export function EnquiryForm({
             type="email"
             autoComplete="email"
             placeholder="you@company.co.ke"
+            aria-invalid={Boolean(state.fieldErrors?.email)}
+            aria-describedby={
+              state.fieldErrors?.email ? "email-error" : undefined
+            }
             className={inputClass}
           />
           <FieldError errors={state.fieldErrors} name="email" />
@@ -269,6 +288,10 @@ export function EnquiryForm({
           required
           rows={5}
           placeholder="Size, quantity, site access, power, finish — anything that helps us quote accurately."
+          aria-invalid={Boolean(state.fieldErrors?.message)}
+          aria-describedby={
+            state.fieldErrors?.message ? "message-error" : undefined
+          }
           className={textareaClass}
         />
         <FieldError errors={state.fieldErrors} name="message" />

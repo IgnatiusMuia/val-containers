@@ -36,12 +36,32 @@ interface AnnouncementRow {
 }
 
 const inputClass =
-  "h-10 w-full border border-bone/15 bg-coal px-3 text-sm text-bone placeholder:text-bone/25 focus:border-ember focus:outline-none";
+  "h-10 w-full border border-bone/15 bg-coal px-3 text-sm text-bone placeholder:text-bone/40 focus:border-ember focus:outline-2 focus:outline-offset-2 focus:outline-ember";
 const labelClass =
-  "mb-1 block font-mono text-[8px] uppercase tracking-[0.12em] text-bone/35";
+  "mb-1 block font-mono text-[8px] uppercase tracking-[0.12em] text-bone/55";
 
-export default async function AdminSettingsPage() {
+const savedNotices: Record<string, string> = {
+  settings: "Business details saved.",
+  announcement: "Announcement saved.",
+  deleted: "Announcement deleted.",
+};
+
+const errorNotices: Record<string, string> = {
+  required: "Site name and email are required.",
+  config: "Supabase is not configured.",
+  settings: "Could not save settings. Try again.",
+  announcement: "Could not save the announcement. Try again.",
+  message: "Add a message before saving the announcement.",
+  missing: "That announcement no longer exists.",
+};
+
+export default async function AdminSettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ edit?: string; saved?: string; error?: string }>;
+}) {
   await requireOwner();
+  const { edit, saved, error } = await searchParams;
 
   const supabase = await createSupabaseServerClient();
   if (!supabase) return null;
@@ -57,7 +77,12 @@ export default async function AdminSettingsPage() {
 
   const settings = settingsData as unknown as SettingsRow | null;
   const announcements = (announcementsData ?? []) as unknown as AnnouncementRow[];
-  const current = announcements[0] ?? null;
+  const current =
+    edit === "new"
+      ? null
+      : (announcements.find((item) => item.id === edit) ??
+        announcements[0] ??
+        null);
 
   if (!settings) {
     return (
@@ -87,6 +112,21 @@ export default async function AdminSettingsPage() {
           Team access
         </Link>
       </div>
+
+      {saved && savedNotices[saved] ? (
+        <p className="mt-6 border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
+          {savedNotices[saved]}
+        </p>
+      ) : null}
+
+      {error && errorNotices[error] ? (
+        <p
+          role="alert"
+          className="mt-6 border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200"
+        >
+          {errorNotices[error]}
+        </p>
+      ) : null}
 
       <form
         action={updateSiteSettingsAction}
@@ -155,31 +195,45 @@ export default async function AdminSettingsPage() {
       </form>
 
       <form
+        key={current?.id ?? "new"}
         action={saveAnnouncementAction}
         className="mt-6 border border-bone/12 bg-ink p-5"
       >
         {current ? <input type="hidden" name="id" value={current.id} /> : null}
-        <h2 className="font-mono text-[9px] uppercase tracking-[0.16em] text-bone/35">
-          Site announcement
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-mono text-[9px] uppercase tracking-[0.16em] text-bone/55">
+            {current ? "Edit announcement" : "New announcement"}
+          </h2>
+          {current ? (
+            <Link
+              href="/admin/settings?edit=new"
+              className="font-mono text-[8px] uppercase tracking-[0.12em] text-ember hover:text-bone"
+            >
+              New announcement
+            </Link>
+          ) : null}
+        </div>
         <div className="mt-4 grid gap-3">
           <textarea
             name="message"
             defaultValue={current?.message ?? ""}
             rows={2}
+            aria-label="Announcement message"
             placeholder="Short message shown above the site"
-            className="w-full border border-bone/15 bg-coal px-3 py-2 text-sm text-bone placeholder:text-bone/25 focus:border-ember focus:outline-none"
+            className="w-full border border-bone/15 bg-coal px-3 py-2 text-sm text-bone placeholder:text-bone/40 focus:border-ember focus:outline-2 focus:outline-offset-2 focus:outline-ember"
           />
           <div className="grid gap-3 sm:grid-cols-2">
             <input
               name="linkLabel"
               defaultValue={current?.link_label ?? ""}
+              aria-label="Announcement link label"
               placeholder="Link label (optional)"
               className={inputClass}
             />
             <input
               name="linkHref"
               defaultValue={current?.link_href ?? ""}
+              aria-label="Announcement link URL"
               placeholder="/containers or https://…"
               className={inputClass}
             />
@@ -213,6 +267,46 @@ export default async function AdminSettingsPage() {
           ) : null}
         </div>
       </form>
+
+      {announcements.length > 0 ? (
+        <div className="mt-6 border border-bone/12">
+          <div className="border-b border-bone/12 px-4 py-3">
+            <h2 className="font-mono text-[9px] uppercase tracking-[0.16em] text-bone/55">
+              All announcements
+            </h2>
+          </div>
+          <ul className="divide-y divide-bone/8">
+            {announcements.map((announcement) => (
+              <li
+                key={announcement.id}
+                className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
+              >
+                <div className="min-w-0">
+                  <Link
+                    href={`/admin/settings?edit=${announcement.id}`}
+                    className="block truncate text-sm text-bone/80 transition-colors hover:text-ember"
+                  >
+                    {announcement.message}
+                  </Link>
+                  <p className="mt-0.5 font-mono text-[8px] uppercase tracking-[0.12em] text-bone/40">
+                    {announcement.active ? "Active" : "Hidden"}
+                  </p>
+                </div>
+                <form action={deleteAnnouncementAction}>
+                  <input type="hidden" name="id" value={announcement.id} />
+                  <ConfirmButton
+                    type="submit"
+                    message="Delete this announcement?"
+                    className="font-mono text-[8px] uppercase tracking-[0.12em] text-red-300/60 transition-colors hover:text-red-200"
+                  >
+                    Delete
+                  </ConfirmButton>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
     </div>
   );
 }

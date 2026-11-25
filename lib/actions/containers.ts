@@ -207,6 +207,9 @@ export async function duplicateContainerAction(formData: FormData) {
   delete rest.created_at;
   delete rest.updated_at;
   delete rest.published_at;
+  delete rest.verified_at;
+  delete rest.verified_by;
+  delete rest.last_inspected_at;
 
   const { error: insertError } = await supabase.from("containers").insert({
     ...rest,

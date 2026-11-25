@@ -18,7 +18,7 @@ const interests = [
 ];
 
 const fieldClass =
-  "h-11 w-full border border-ink/20 bg-bone px-3 text-[13px] text-ink placeholder:text-ink/30 focus:border-ember-deep focus:outline-none";
+  "h-11 w-full border border-ink/20 bg-bone px-3 text-[13px] text-ink placeholder:text-ink/50 focus:border-ember-deep focus:outline-2 focus:outline-offset-2 focus:outline-ember-deep";
 
 const initialState: EnquiryActionState = {};
 
@@ -47,7 +47,7 @@ export function ContactForm() {
             href={state.whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-5 flex h-12 items-center justify-center gap-2 bg-whatsapp text-[13px] font-medium text-white"
+            className="mt-5 flex h-12 items-center justify-center gap-2 bg-whatsapp text-[13px] font-medium text-ink"
           >
             <Icon name="whatsapp" className="h-4 w-4" />
             Continue on WhatsApp
@@ -55,7 +55,7 @@ export function ContactForm() {
         ) : null}
         <Link
           href="/enquire"
-          className="mt-4 inline-flex text-[11px] text-ink/45 underline decoration-ink/20 underline-offset-4 hover:text-ink"
+          className="mt-4 inline-flex text-[11px] text-ink/60 underline decoration-ink/20 underline-offset-4 hover:text-ink"
         >
           Open the full enquiry form
         </Link>
@@ -77,7 +77,10 @@ export function ContactForm() {
       />
 
       {state.error ? (
-        <p className="border border-red-700/25 bg-red-700/5 px-3 py-2 text-sm text-red-800">
+        <p
+          role="alert"
+          className="border border-red-700/25 bg-red-700/5 px-3 py-2 text-sm text-red-800"
+        >
           {state.error}
         </p>
       ) : null}
@@ -86,7 +89,7 @@ export function ContactForm() {
         <div>
           <label
             htmlFor="contact-name"
-            className="mb-1.5 block font-mono text-[8.5px] uppercase tracking-[0.12em] text-ink/45"
+            className="mb-1.5 block font-mono text-[8.5px] uppercase tracking-[0.12em] text-ink/60"
           >
             Name *
           </label>
@@ -102,7 +105,7 @@ export function ContactForm() {
         <div>
           <label
             htmlFor="contact-phone"
-            className="mb-1.5 block font-mono text-[8.5px] uppercase tracking-[0.12em] text-ink/45"
+            className="mb-1.5 block font-mono text-[8.5px] uppercase tracking-[0.12em] text-ink/60"
           >
             Phone / WhatsApp *
           </label>
@@ -122,7 +125,7 @@ export function ContactForm() {
         <div>
           <label
             htmlFor="contact-email"
-            className="mb-1.5 block font-mono text-[8.5px] uppercase tracking-[0.12em] text-ink/45"
+            className="mb-1.5 block font-mono text-[8.5px] uppercase tracking-[0.12em] text-ink/60"
           >
             Email (optional)
           </label>
@@ -138,7 +141,7 @@ export function ContactForm() {
         <div>
           <label
             htmlFor="contact-interest"
-            className="mb-1.5 block font-mono text-[8.5px] uppercase tracking-[0.12em] text-ink/45"
+            className="mb-1.5 block font-mono text-[8.5px] uppercase tracking-[0.12em] text-ink/60"
           >
             Interest
           </label>
@@ -160,7 +163,7 @@ export function ContactForm() {
       <div>
         <label
           htmlFor="contact-message"
-          className="mb-1.5 block font-mono text-[8.5px] uppercase tracking-[0.12em] text-ink/45"
+          className="mb-1.5 block font-mono text-[8.5px] uppercase tracking-[0.12em] text-ink/60"
         >
           What do you need? *
         </label>
@@ -170,14 +173,14 @@ export function ContactForm() {
           required
           rows={5}
           placeholder="Size, use, delivery town, timeline — or just ask a question."
-          className="w-full resize-y border border-ink/20 bg-bone px-3 py-2.5 text-[13px] leading-relaxed text-ink placeholder:text-ink/30 focus:border-ember-deep focus:outline-none"
+          className="w-full resize-y border border-ink/20 bg-bone px-3 py-2.5 text-[13px] leading-relaxed text-ink placeholder:text-ink/50 focus:border-ember-deep focus:outline-2 focus:outline-offset-2 focus:outline-ember-deep"
         />
       </div>
 
       <button
         type="submit"
         disabled={pending}
-        className="flex h-12 w-full items-center justify-center gap-2 bg-whatsapp text-[13px] font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+        className="flex h-12 w-full items-center justify-center gap-2 bg-whatsapp text-[13px] font-medium text-ink transition-opacity hover:opacity-90 disabled:opacity-60"
       >
         <Icon name="whatsapp" className="h-4 w-4" />
         {pending ? "Saving…" : "Save message & open WhatsApp"}
